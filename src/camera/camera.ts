@@ -7,7 +7,7 @@ export class Camera extends THREE.PerspectiveCamera {
     fov = 50,
     near = 0.1,
     far = 100,
-    position = [5, 3.5, 6] as Vec3,
+    position = [-5.5, 1.85, 6.2] as Vec3,
   }: CameraOptions = {}) {
     super(fov, aspect, near, far);
 

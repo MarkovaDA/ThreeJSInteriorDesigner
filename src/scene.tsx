@@ -21,7 +21,9 @@ export default function Scene() {
 
     const room = new Room({ width: 8, height: 3.2, depth: 8 });
     const camera = new Camera({ aspect: width / height });
-    camera.lookAt(room.center);
+    const viewTarget = room.center.clone();
+    viewTarget.y += 0.35;
+    camera.lookAt(viewTarget);
 
     const renderer = new Renderer({
       container,
@@ -33,7 +35,7 @@ export default function Scene() {
     });
 
     const controls = new Controls(camera, renderer.domElement, {
-      target: room.center,
+      target: viewTarget,
     });
 
     const lighting = new Lighting({
