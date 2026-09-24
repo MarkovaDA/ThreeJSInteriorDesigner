@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Color, Scene as ThreeScene } from 'three';
 import { Camera } from './camera/camera';
 import { Controls } from './controls';
+import { RoomDoor } from './containers/door';
 import { Room } from './containers/room';
 import { RoomWindow } from './containers/window';
 import { Lighting } from './meshs/lighting';
@@ -66,6 +67,16 @@ export default function Scene() {
     roomWindow.rotation.y = -Math.PI / 2;
     room.add(roomWindow);
 
+    const doorHeight = 2.2;
+    const roomDoor = new RoomDoor({ width: 1.0, height: doorHeight });
+    roomDoor.position.set(
+      -room.width / 2 + 0.02,
+      -room.height / 2 + doorHeight / 2,
+      0,
+    );
+    roomDoor.rotation.y = Math.PI / 2;
+    room.add(roomDoor);
+
     scene.add(lighting);
     scene.add(room);
 
@@ -93,6 +104,7 @@ export default function Scene() {
       window.removeEventListener('resize', onResize);
       controls.dispose();
       roomWindow.dispose();
+      roomDoor.dispose();
       room.dispose();
       renderer.unmount();
     };
