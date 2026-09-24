@@ -1,7 +1,11 @@
-import * as THREE from 'three';
+import {
+  ACESFilmicToneMapping,
+  PCFSoftShadowMap,
+  WebGLRenderer,
+} from 'three';
 import type { RendererOptions } from './types';
 
-export class Renderer extends THREE.WebGLRenderer {
+export class Renderer extends WebGLRenderer {
   #container: HTMLElement | null = null;
 
   constructor({
@@ -12,13 +16,13 @@ export class Renderer extends THREE.WebGLRenderer {
     shadows = true,
     exposure = 1.1,
     pixelRatio = Math.min(window.devicePixelRatio, 2),
-    toneMapping = THREE.ACESFilmicToneMapping,
+    toneMapping = ACESFilmicToneMapping,
   }: RendererOptions = {}) {
     super({ antialias });
 
     this.setPixelRatio(pixelRatio);
     this.shadowMap.enabled = shadows;
-    this.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.shadowMap.type = PCFSoftShadowMap;
     this.toneMapping = toneMapping;
     this.toneMappingExposure = exposure;
 

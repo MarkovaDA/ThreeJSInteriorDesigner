@@ -1,14 +1,15 @@
-import * as THREE from 'three';
 import {
+  BackSide,
   BoxGeometry,
-  MeshStandardMaterial,
-  Material,
   BufferGeometry,
+  Material,
+  Mesh,
+  MeshStandardMaterial,
   Vector3,
 } from 'three';
 import type { RoomOptions } from './types';
 
-export class Room extends THREE.Mesh {
+export class Room extends Mesh {
   readonly width: number;
   readonly height: number;
   readonly depth: number;
@@ -23,19 +24,19 @@ export class Room extends THREE.Mesh {
     const wallMat = new MeshStandardMaterial({
       color: 0xf0ebe4,
       roughness: 0.9,
-      side: THREE.BackSide,
+      side: BackSide,
     });
 
     const floorMat = new MeshStandardMaterial({
       color: 0xb8956c,
       roughness: 0.8,
-      side: THREE.BackSide,
+      side: BackSide,
     });
 
     const ceilingMat = new MeshStandardMaterial({
       color: 0xfaf8f5,
       roughness: 1,
-      side: THREE.BackSide,
+      side: BackSide,
     });
 
     // Порядок граней BoxGeometry: +x, -x, +y, -y, +z, -z
@@ -73,7 +74,7 @@ export class Room extends THREE.Mesh {
   }
 
   get center(): Vector3 {
-    return new THREE.Vector3(0, this.height / 2, 0);
+    return new Vector3(0, this.height / 2, 0);
   }
 
   dispose(): void {

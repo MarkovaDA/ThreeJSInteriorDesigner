@@ -1,11 +1,17 @@
-import * as THREE from 'three';
+import {
+  AmbientLight,
+  DirectionalLight,
+  Group,
+  HemisphereLight,
+  PointLight,
+} from 'three';
 import type { LightingOptions, Vec3 } from './types';
 
-export class Lighting extends THREE.Group {
-  readonly ambient: THREE.AmbientLight;
-  readonly hemisphere: THREE.HemisphereLight;
-  readonly sun: THREE.DirectionalLight;
-  readonly fill: THREE.PointLight;
+export class Lighting extends Group {
+  readonly ambient: AmbientLight;
+  readonly hemisphere: HemisphereLight;
+  readonly sun: DirectionalLight;
+  readonly fill: PointLight;
 
   constructor({
     ambient = {},
@@ -16,21 +22,22 @@ export class Lighting extends THREE.Group {
     super();
     this.name = 'Lighting';
 
-    this.ambient = new THREE.AmbientLight(
+    this.ambient = new AmbientLight(
       ambient.color ?? 0xfff6ee,
       ambient.intensity ?? 0.55,
     );
 
-    this.hemisphere = new THREE.HemisphereLight(
+    this.hemisphere = new HemisphereLight(
       hemisphere.skyColor ?? 0xe8f0ff,
       hemisphere.groundColor ?? 0xc4a882,
       hemisphere.intensity ?? 0.4,
     );
 
-    this.sun = new THREE.DirectionalLight(
+    this.sun = new DirectionalLight(
       sun.color ?? 0xfff2dd,
       sun.intensity ?? 1.2,
     );
+
     this.sun.position.set(...(sun.position ?? ([4, 8, 5] as Vec3)));
     this.sun.castShadow = sun.castShadow ?? true;
 
@@ -46,7 +53,7 @@ export class Lighting extends THREE.Group {
     this.sun.shadow.camera.bottom = -shadowSize;
     this.sun.shadow.bias = -0.0003;
 
-    this.fill = new THREE.PointLight(
+    this.fill = new PointLight(
       fill.color ?? 0xffe8d0,
       fill.intensity ?? 12,
       fill.distance ?? 14,

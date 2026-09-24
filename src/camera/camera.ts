@@ -1,7 +1,7 @@
-import * as THREE from 'three';
+import { PerspectiveCamera } from 'three';
 import type { CameraOptions, Vec3 } from './types';
 
-export class Camera extends THREE.PerspectiveCamera {
+export class Camera extends PerspectiveCamera {
   constructor({
     aspect = 1,
     fov = 50,
