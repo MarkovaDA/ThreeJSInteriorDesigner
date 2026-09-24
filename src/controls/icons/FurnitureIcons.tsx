@@ -71,6 +71,30 @@ function LampIcon({ className }: IconProps) {
   );
 }
 
+function CurtainsIcon({ className }: IconProps) {
+  return (
+    <svg className={className} {...svgProps}>
+      <path d="M4 4h16" />
+      <path d="M5 4c1.5 2 1.5 5 0 7s-1.5 5 0 9" />
+      <path d="M9 4c1.5 2 1.5 5 0 7s-1.5 5 0 9" />
+      <path d="M15 4c-1.5 2-1.5 5 0 7s1.5 5 0 9" />
+      <path d="M19 4c-1.5 2-1.5 5 0 7s1.5 5 0 9" />
+    </svg>
+  );
+}
+
+function CorniceIcon({ className }: IconProps) {
+  return (
+    <svg className={className} {...svgProps}>
+      <path d="M3 12h18" />
+      <circle cx="3.5" cy="12" r="1.5" />
+      <circle cx="20.5" cy="12" r="1.5" />
+      <path d="M8 12v3M16 12v3" />
+      <path d="M7 15h2M15 15h2" />
+    </svg>
+  );
+}
+
 const icons: Record<FurnitureIconId, (props: IconProps) => ReactElement> = {
   chair: ChairIcon,
   table: TableIcon,
@@ -78,6 +102,8 @@ const icons: Record<FurnitureIconId, (props: IconProps) => ReactElement> = {
   bed: BedIcon,
   wardrobe: WardrobeIcon,
   lamp: LampIcon,
+  curtains: CurtainsIcon,
+  cornice: CorniceIcon,
 };
 
 export function FurnitureIcon({

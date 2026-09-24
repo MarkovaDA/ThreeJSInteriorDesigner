@@ -4,7 +4,9 @@ export type FurnitureIconId =
   | 'sofa'
   | 'bed'
   | 'wardrobe'
-  | 'lamp';
+  | 'lamp'
+  | 'curtains'
+  | 'cornice';
 
 export type FurnitureItem = {
   id: string;

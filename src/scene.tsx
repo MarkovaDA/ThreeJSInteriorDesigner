@@ -5,6 +5,8 @@ import { Controls } from './controls';
 import { RoomDoor } from './containers/door';
 import { Room } from './containers/room';
 import { RoomWindow } from './containers/window';
+import { Curtains } from './furniture/curtains';
+import { Cornice } from './furniture/cornice';
 import { Lighting } from './meshs/lighting';
 import { Renderer } from './renderer/renderer';
 
@@ -14,6 +16,9 @@ export default function Scene() {
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+
+    let cancelled = false;
+    let curtains: Curtains | null = null;
 
     const width = container.clientWidth;
     const height = container.clientHeight;
@@ -62,13 +67,26 @@ export default function Scene() {
       },
     });
 
-    const roomWindow = new RoomWindow({ width: 2.6, height: 2.0 });
-    roomWindow.position.set(room.width / 2 - 0.02, -0.15, 0);
+    const windowWidth = 2.6;
+    const windowHeight = 2.0;
+    const roomWindow = new RoomWindow({ width: windowWidth, height: windowHeight });
+    roomWindow.position.set(room.width / 2 - 0.12, -0.15, 0);
     roomWindow.rotation.y = -Math.PI / 2;
+
+    const cornice = new Cornice({ width: windowWidth + 0.55 });
+    // Local to the window: just above the frame, toward the room.
+    cornice.position.set(0, windowHeight / 2 - 0.02, 0.1);
+    roomWindow.add(cornice);
     room.add(roomWindow);
 
     const doorHeight = 2.2;
-    const roomDoor = new RoomDoor({ width: 1.0, height: doorHeight });
+    const roomDoor = new RoomDoor({
+      width: 1.0,
+      height: doorHeight,
+      panelColor: 0xc4a484,
+      frameColor: 0xf5f2ec,
+      handleColor: 0xc4a46a,
+    });
     roomDoor.position.set(
       -room.width / 2 + 0.02,
       -room.height / 2 + doorHeight / 2,
@@ -79,6 +97,19 @@ export default function Scene() {
 
     scene.add(lighting);
     scene.add(room);
+
+    void Curtains.load({ targetWidth: 1.7 }).then((loaded) => {
+      if (cancelled) {
+        loaded.dispose();
+        return;
+      }
+
+      curtains = loaded;
+
+      // Attach under the cornice (inherits window orientation).
+      curtains.hangFromRod({ x: 1.0, z: 0.08, gap: 0.02 });
+      cornice.add(curtains);
+    });
 
     let frameId = 0;
 
@@ -100,9 +131,12 @@ export default function Scene() {
     window.addEventListener('resize', onResize);
 
     return () => {
+      cancelled = true;
       cancelAnimationFrame(frameId);
       window.removeEventListener('resize', onResize);
       controls.dispose();
+      curtains?.dispose();
+      cornice.dispose();
       roomWindow.dispose();
       roomDoor.dispose();
       room.dispose();
