@@ -8,13 +8,7 @@ import {
   MeshStandardMaterial,
   SphereGeometry,
 } from 'three';
-
-export type CorniceOptions = {
-  width?: number;
-  rodRadius?: number;
-  finialRadius?: number;
-  color?: number;
-};
+import type { CorniceOptions } from './types';
 
 export class Cornice extends Group {
   readonly metalMat: MeshStandardMaterial;
@@ -108,3 +102,5 @@ export class Cornice extends Group {
     this.#disposables.length = 0;
   }
 }
+
+export type { CorniceOptions } from './types';

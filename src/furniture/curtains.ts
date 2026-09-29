@@ -9,16 +9,9 @@ import {
   Vector3,
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import type { CurtainsOptions } from './types';
 
-export type CurtainsOptions = {
-  /** Target width across the window, in meters. */
-  targetWidth?: number;
-  /** Soft fabric color applied to UV-unwrapped meshes without textures. */
-  fabricColor?: number;
-  fabricRoughness?: number;
-};
-
-const MODEL_URL = `${import.meta.env.BASE_URL}furniture/victorian_curtain.glb`;
+const MODEL_URL = `${import.meta.env.BASE_URL}furniture/curtains/victorian_curtain.glb`;
 
 export class Curtains extends Group {
   #disposables: Material[] = [];
@@ -129,3 +122,5 @@ export class Curtains extends Group {
     this.#disposables.length = 0;
   }
 }
+
+export type { CurtainsOptions } from './types';

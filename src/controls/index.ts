@@ -29,3 +29,5 @@ export class Controls extends OrbitControls {
 }
 
 export type { ControlsOptions } from './types';
+export { FurnitureDragControls } from './furniture-drag';
+export type { FurnitureDragBounds, FurnitureDragOptions } from './types';

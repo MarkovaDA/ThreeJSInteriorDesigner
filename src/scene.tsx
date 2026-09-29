@@ -1,23 +1,91 @@
 import { useEffect, useRef } from 'react';
 import { Color, Scene as ThreeScene } from 'three';
 import { Camera } from './camera/camera';
-import { Controls } from './controls';
+import { Controls, FurnitureDragControls } from './controls';
 import { RoomDoor } from './containers/door';
 import { Room } from './containers/room';
 import { RoomWindow } from './containers/window';
 import { Curtains } from './furniture/curtains';
 import { Cornice } from './furniture/cornice';
+import { Sofa } from './furniture/sofa';
+import type { SceneProps } from './furniture/types';
 import { Lighting } from './meshs/lighting';
 import { Renderer } from './renderer/renderer';
 
-export default function Scene() {
+export default function Scene({
+  selectedFurnitureId = null,
+  furnitureRequestId = 0,
+}: SceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<ThreeScene | null>(null);
+  const roomRef = useRef<Room | null>(null);
+  const sofaRef = useRef<Sofa | null>(null);
+  const dragControlsRef = useRef<FurnitureDragControls | null>(null);
+  const cancelledRef = useRef(false);
+  const loadingSofaRef = useRef(false);
+  const loadTokenRef = useRef(0);
+  const pendingFurnitureIdRef = useRef<string | null>(null);
+
+  const placeFurnitureRef = useRef<(id: string) => Promise<void>>(async () => {});
+
+  placeFurnitureRef.current = async (id: string) => {
+    if (id !== 'sofa') {
+      return;
+    }
+
+    const scene = sceneRef.current;
+    const room = roomRef.current;
+
+    if (!scene || !room) {
+      pendingFurnitureIdRef.current = id;
+      return;
+    }
+
+    if (sofaRef.current || loadingSofaRef.current) {
+      return;
+    }
+
+    loadingSofaRef.current = true;
+    const loadToken = ++loadTokenRef.current;
+
+    try {
+      const loaded = await Sofa.load({ targetWidth: 2.4 });
+
+      if (
+        cancelledRef.current ||
+        loadToken !== loadTokenRef.current ||
+        !sceneRef.current
+      ) {
+        loaded.dispose();
+        return;
+      }
+
+      sofaRef.current = loaded;
+      loaded.userData.label = 'Sofa';
+      // World space: room sits on y = 0, centered on XZ.
+      loaded.position.set(0, 0, 0);
+      loaded.placeOnFloor(0);
+      // Face roughly toward the default camera.
+      loaded.rotation.y = Math.PI / 2;
+
+      scene.add(loaded);
+      dragControlsRef.current?.addTarget(loaded);
+    } catch (error) {
+      console.error('Failed to load sofa model:', error);
+    } finally {
+      if (loadToken === loadTokenRef.current) {
+        loadingSofaRef.current = false;
+      }
+    }
+  };
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    let cancelled = false;
+    cancelledRef.current = false;
+    loadingSofaRef.current = false;
+
     let curtains: Curtains | null = null;
 
     const width = container.clientWidth;
@@ -25,8 +93,11 @@ export default function Scene() {
 
     const scene = new ThreeScene();
     scene.background = new Color(0xd4dde8);
+    sceneRef.current = scene;
 
     const room = new Room({ width: 8, height: 3.2, depth: 8 });
+    roomRef.current = room;
+
     const camera = new Camera({ aspect: width / height });
     const viewTarget = room.center.clone();
     viewTarget.y += 0.35;
@@ -44,6 +115,23 @@ export default function Scene() {
     const controls = new Controls(camera, renderer.domElement, {
       target: viewTarget,
     });
+
+    const margin = 1.2;
+    const dragControls = new FurnitureDragControls(
+      camera,
+      renderer.domElement,
+      controls,
+      {
+        floorY: 0,
+        bounds: {
+          minX: -room.width / 2 + margin,
+          maxX: room.width / 2 - margin,
+          minZ: -room.depth / 2 + margin,
+          maxZ: room.depth / 2 - margin,
+        },
+      },
+    );
+    dragControlsRef.current = dragControls;
 
     const lighting = new Lighting({
       ambient: { color: 0xfff6ee, intensity: 0.55 },
@@ -87,11 +175,13 @@ export default function Scene() {
       frameColor: 0xf5f2ec,
       handleColor: 0xc4a46a,
     });
+
     roomDoor.position.set(
       -room.width / 2 + 0.02,
       -room.height / 2 + doorHeight / 2,
       0,
     );
+
     roomDoor.rotation.y = Math.PI / 2;
     room.add(roomDoor);
 
@@ -99,7 +189,7 @@ export default function Scene() {
     scene.add(room);
 
     void Curtains.load({ targetWidth: 1.7 }).then((loaded) => {
-      if (cancelled) {
+      if (cancelledRef.current) {
         loaded.dispose();
         return;
       }
@@ -116,6 +206,7 @@ export default function Scene() {
     const animate = () => {
       frameId = requestAnimationFrame(animate);
       controls.update();
+      dragControls.update();
       renderer.render(scene, camera);
     };
 
@@ -130,12 +221,33 @@ export default function Scene() {
 
     window.addEventListener('resize', onResize);
 
+    const pendingId = pendingFurnitureIdRef.current;
+
+    if (pendingId) {
+      pendingFurnitureIdRef.current = null;
+      void placeFurnitureRef.current(pendingId);
+    } else {
+      void placeFurnitureRef.current('sofa');
+    }
+
+    if (sofaRef.current) {
+      dragControls.addTarget(sofaRef.current);
+    }
+
     return () => {
-      cancelled = true;
+      cancelledRef.current = true;
+      loadTokenRef.current += 1;
+      loadingSofaRef.current = false;
       cancelAnimationFrame(frameId);
       window.removeEventListener('resize', onResize);
+      dragControls.dispose();
+      dragControlsRef.current = null;
       controls.dispose();
       curtains?.dispose();
+      sofaRef.current?.dispose();
+      sofaRef.current = null;
+      sceneRef.current = null;
+      roomRef.current = null;
       cornice.dispose();
       roomWindow.dispose();
       roomDoor.dispose();
@@ -143,6 +255,14 @@ export default function Scene() {
       renderer.unmount();
     };
   }, []);
+
+  useEffect(() => {
+    if (!selectedFurnitureId || furnitureRequestId <= 0) {
+      return;
+    }
+
+    void placeFurnitureRef.current(selectedFurnitureId);
+  }, [selectedFurnitureId, furnitureRequestId]);
 
   return <div ref={containerRef} className="scene" />;
 }

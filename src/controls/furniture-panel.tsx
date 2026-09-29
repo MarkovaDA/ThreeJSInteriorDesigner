@@ -1,12 +1,8 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { furnitureItems } from '../furniture/catalog';
 import { FurnitureIcon } from './icons/FurnitureIcons';
+import type { FurniturePanelProps, PanelPosition } from './types';
 import './furniture-panel.css';
-
-type PanelPosition = {
-  x: number;
-  y: number;
-};
 
 function clampPosition(
   x: number,
@@ -23,12 +19,14 @@ function clampPosition(
   };
 }
 
-export function FurniturePanel() {
+export function FurniturePanel({
+  selectedId = null,
+  onSelect,
+}: FurniturePanelProps) {
   const panelRef = useRef<HTMLElement>(null);
   const dragOffsetRef = useRef({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [position, setPosition] = useState<PanelPosition | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -93,6 +91,7 @@ export function FurniturePanel() {
     }
 
     const panel = panelRef.current;
+    
     const next = clampPosition(
       event.clientX - dragOffsetRef.current.x,
       event.clientY - dragOffsetRef.current.y,
@@ -153,7 +152,7 @@ export function FurniturePanel() {
                     : 'furniture-panel__item'
                 }
                 aria-pressed={isSelected}
-                onClick={() => setSelectedId(item.id)}
+                onClick={() => onSelect?.(item.id)}
               >
                 <span className="furniture-panel__glow" aria-hidden="true" />
 
@@ -168,3 +167,5 @@ export function FurniturePanel() {
     </aside>
   );
 }
+
+export type { FurniturePanelProps, PanelPosition } from './types';
