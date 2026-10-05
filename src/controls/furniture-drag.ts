@@ -27,6 +27,7 @@ export class FurnitureDragControls {
   #dragOffset = new Vector3();
   #labelWorld = new Vector3();
   #labelBox = new Box3();
+  #boundsBox = new Box3();
 
   #targets: Object3D[] = [];
   #dragTarget: Object3D | null = null;
@@ -207,16 +208,9 @@ export class FurnitureDragControls {
       const localHit = this.#toParentLocal(this.#dragTarget, this.#hitPoint);
 
       if (this.#dragMode === 'move') {
-        const { minX, maxX, minZ, maxZ } = this.#bounds;
-
-        this.#dragTarget.position.x = Math.min(
-          Math.max(localHit.x + this.#dragOffset.x, minX),
-          maxX,
-        );
-        this.#dragTarget.position.z = Math.min(
-          Math.max(localHit.z + this.#dragOffset.z, minZ),
-          maxZ,
-        );
+        this.#dragTarget.position.x = localHit.x + this.#dragOffset.x;
+        this.#dragTarget.position.z = localHit.z + this.#dragOffset.z;
+        this.#clampPositionToBounds(this.#dragTarget);
 
         return;
       }
@@ -272,6 +266,33 @@ export class FurnitureDragControls {
     event.preventDefault();
     event.stopPropagation();
   };
+
+  /**
+   * Clamp the pivot so the object's current world AABB stays inside the room.
+   * Extents follow the live orientation (so depth vs width both work after yaw).
+   */
+  #clampPositionToBounds(target: Object3D): void {
+    const { minX, maxX, minZ, maxZ } = this.#bounds;
+
+    target.updateWorldMatrix(true, true);
+    this.#boundsBox.setFromObject(target);
+
+    const pivotX = target.position.x;
+    const pivotZ = target.position.z;
+    const extentMinX = pivotX - this.#boundsBox.min.x;
+    const extentMaxX = this.#boundsBox.max.x - pivotX;
+    const extentMinZ = pivotZ - this.#boundsBox.min.z;
+    const extentMaxZ = this.#boundsBox.max.z - pivotZ;
+
+    target.position.x = Math.min(
+      Math.max(pivotX, minX + extentMinX),
+      maxX - extentMaxX,
+    );
+    target.position.z = Math.min(
+      Math.max(pivotZ, minZ + extentMinZ),
+      maxZ - extentMaxZ,
+    );
+  }
 
   #updateHover(): void {
     const target = this.#pickTarget();

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Color, Scene as ThreeScene } from 'three';
+import { Box3, Color, Scene as ThreeScene } from 'three';
 import { Camera } from './camera/camera';
 import { Controls, FurnitureDragControls } from './controls';
 import { RoomDoor } from './containers/door';
@@ -65,8 +65,12 @@ export default function Scene({
       // World space: room sits on y = 0, centered on XZ.
       loaded.position.set(0, 0, 0);
       loaded.placeOnFloor(0);
-      // Face roughly toward the default camera.
-      loaded.rotation.y = Math.PI / 2;
+      // Back against the wall on the right when entering from the door (-Z).
+      loaded.rotation.y = -Math.PI / 2;
+
+      loaded.updateMatrixWorld(true);
+      const sofaBox = new Box3().setFromObject(loaded);
+      loaded.position.z += -room.depth / 2 - sofaBox.min.z;
 
       scene.add(loaded);
       dragControlsRef.current?.addTarget(loaded);
@@ -116,7 +120,6 @@ export default function Scene({
       target: viewTarget,
     });
 
-    const margin = 1.2;
     const dragControls = new FurnitureDragControls(
       camera,
       renderer.domElement,
@@ -124,13 +127,14 @@ export default function Scene({
       {
         floorY: 0,
         bounds: {
-          minX: -room.width / 2 + margin,
-          maxX: room.width / 2 - margin,
-          minZ: -room.depth / 2 + margin,
-          maxZ: room.depth / 2 - margin,
+          minX: -room.width / 2,
+          maxX: room.width / 2,
+          minZ: -room.depth / 2,
+          maxZ: room.depth / 2,
         },
       },
     );
+
     dragControlsRef.current = dragControls;
 
     const lighting = new Lighting({
@@ -158,6 +162,7 @@ export default function Scene({
     const windowWidth = 2.6;
     const windowHeight = 2.0;
     const roomWindow = new RoomWindow({ width: windowWidth, height: windowHeight });
+    
     roomWindow.position.set(room.width / 2 - 0.12, -0.15, 0);
     roomWindow.rotation.y = -Math.PI / 2;
 
