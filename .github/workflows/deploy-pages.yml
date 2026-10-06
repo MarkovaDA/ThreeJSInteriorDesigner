@@ -11,7 +11,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -32,8 +32,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Stamp deploy
+        run: echo "${{ github.sha }} ${{ github.run_id }}" > dist/deploy-stamp.txt
+
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
+          force_orphan: true
