@@ -8,7 +8,7 @@ import {
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { SofaOptions } from './types';
 
-const MODEL_URL = `${import.meta.env.BASE_URL}furniture/sofa/leather_sofa.glb`;
+const MODEL_URL = `${import.meta.env.BASE_URL}furniture/sofa/leather_sofa.glb?v=20261006`;
 
 export class Sofa extends Group {
   private constructor() {
