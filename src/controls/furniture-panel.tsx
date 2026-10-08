@@ -1,144 +1,33 @@
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { furnitureItems } from '../furniture/catalog';
 import { FurnitureIcon } from './icons/FurnitureIcons';
-import type { FurniturePanelProps, PanelPosition } from './types';
+import type { FurniturePanelProps } from './types';
 import './furniture-panel.css';
 
-function clampPosition(
-  x: number,
-  y: number,
-  panelWidth: number,
-  panelHeight: number,
-): PanelPosition {
-  const maxX = Math.max(window.innerWidth - panelWidth, 0);
-  const maxY = Math.max(window.innerHeight - panelHeight, 0);
-
-  return {
-    x: Math.min(Math.max(x, 0), maxX),
-    y: Math.min(Math.max(y, 0), maxY),
-  };
-}
+const choiceOptions = [
+  { id: 'classic', label: 'Classic' },
+  { id: 'modern', label: 'Modern' },
+  { id: 'compact', label: 'Compact' },
+] as const;
 
 export function FurniturePanel({
   selectedId = null,
+  selectedChoiceId = null,
   onSelect,
+  onChoiceSelect,
 }: FurniturePanelProps) {
-  const panelRef = useRef<HTMLElement>(null);
-  const dragOffsetRef = useRef({ x: 0, y: 0 });
-  const isDraggingRef = useRef(false);
-
-  const [position, setPosition] = useState<PanelPosition | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-
-  useEffect(() => {
-    if (!position || !panelRef.current) {
-      return;
-    }
-
-    const panel = panelRef.current;
-
-    const onResize = () => {
-      setPosition((current) => {
-        if (!current) {
-          return current;
-        }
-
-        return clampPosition(
-          current.x,
-          current.y,
-          panel.offsetWidth,
-          panel.offsetHeight,
-        );
-      });
-    };
-
-    window.addEventListener('resize', onResize);
-
-    return () => {
-      window.removeEventListener('resize', onResize);
-    };
-  }, [position]);
-
-  const onDragStart = (event: ReactPointerEvent<HTMLElement>) => {
-    if (event.button !== 0 || !panelRef.current) {
-      return;
-    }
-
-    const target = event.target as HTMLElement;
-
-    if (target.closest('button')) {
-      return;
-    }
-
-    const panel = panelRef.current;
-    const rect = panel.getBoundingClientRect();
-
-    dragOffsetRef.current = {
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
-    };
-
-    isDraggingRef.current = true;
-    setPosition({ x: rect.left, y: rect.top });
-    setIsDragging(true);
-
-    panel.setPointerCapture(event.pointerId);
-  };
-
-  const onDragMove = (event: ReactPointerEvent<HTMLElement>) => {
-    if (!isDraggingRef.current || !panelRef.current) {
-      return;
-    }
-
-    const panel = panelRef.current;
-    
-    const next = clampPosition(
-      event.clientX - dragOffsetRef.current.x,
-      event.clientY - dragOffsetRef.current.y,
-      panel.offsetWidth,
-      panel.offsetHeight,
-    );
-
-    setPosition(next);
-  };
-
-  const onDragEnd = (event: ReactPointerEvent<HTMLElement>) => {
-    if (!isDraggingRef.current || !panelRef.current) {
-      return;
-    }
-
-    isDraggingRef.current = false;
-    setIsDragging(false);
-
-    if (panelRef.current.hasPointerCapture(event.pointerId)) {
-      panelRef.current.releasePointerCapture(event.pointerId);
-    }
-  };
-
-  const panelStyle = position
-    ? { left: position.x, top: position.y, right: 'auto' }
-    : undefined;
+  const selectedItem =
+    furnitureItems.find((item) => item.id === selectedId) ?? null;
+  const isExpanded = selectedItem !== null;
 
   return (
-    <aside
-      ref={panelRef}
+    <div
       className={
-        isDragging
-          ? 'furniture-panel furniture-panel--dragging'
+        isExpanded
+          ? 'furniture-panel furniture-panel--expanded'
           : 'furniture-panel'
       }
-      style={panelStyle}
-      aria-label="Furniture catalog"
-      onPointerDown={onDragStart}
-      onPointerMove={onDragMove}
-      onPointerUp={onDragEnd}
-      onPointerCancel={onDragEnd}
     >
-      <header className="furniture-panel__header">
-        <h2 className="furniture-panel__title">Furniture</h2>
-      </header>
-
-      <ul className="furniture-panel__grid">
+      <ul className="furniture-panel__grid" aria-label="Furniture catalog">
         {furnitureItems.map((item) => {
           const isSelected = selectedId === item.id;
 
@@ -152,11 +41,15 @@ export function FurniturePanel({
                     : 'furniture-panel__item'
                 }
                 aria-pressed={isSelected}
+                aria-expanded={isSelected}
                 onClick={() => onSelect?.(item.id)}
               >
                 <span className="furniture-panel__glow" aria-hidden="true" />
 
-                <FurnitureIcon id={item.icon} className="furniture-panel__icon" />
+                <FurnitureIcon
+                  id={item.icon}
+                  className="furniture-panel__icon"
+                />
 
                 <span className="furniture-panel__label">{item.name}</span>
               </button>
@@ -164,8 +57,53 @@ export function FurniturePanel({
           );
         })}
       </ul>
-    </aside>
+
+      <div
+        className={
+          isExpanded
+            ? 'furniture-panel__drawer furniture-panel__drawer--open'
+            : 'furniture-panel__drawer'
+        }
+        aria-hidden={!isExpanded}
+      >
+        <div className="furniture-panel__drawer-inner">
+          {selectedItem ? (
+            <section
+              className="furniture-panel__choices"
+              aria-label={`${selectedItem.name} options`}
+            >
+              <p className="furniture-panel__choices-title">
+                Choose {selectedItem.name.toLowerCase()}
+              </p>
+
+              <ul className="furniture-panel__choices-list">
+                {choiceOptions.map((choice) => {
+                  const isActive = selectedChoiceId === choice.id;
+
+                  return (
+                    <li key={choice.id}>
+                      <button
+                        type="button"
+                        className={
+                          isActive
+                            ? 'furniture-panel__choice furniture-panel__choice--selected'
+                            : 'furniture-panel__choice'
+                        }
+                        aria-pressed={isActive}
+                        onClick={() => onChoiceSelect?.(choice.id)}
+                      >
+                        {choice.label}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ) : null}
+        </div>
+      </div>
+    </div>
   );
 }
 
-export type { FurniturePanelProps, PanelPosition } from './types';
+export type { FurniturePanelProps } from './types';
