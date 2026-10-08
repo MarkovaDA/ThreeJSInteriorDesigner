@@ -30,6 +30,7 @@ function App() {
       <Scene
         selectedFurnitureId={selectedFurnitureId}
         furnitureRequestId={furnitureRequestId}
+        lustreModel="red_cuisine.glb"
         onFurnitureSelect={handleFurnitureSelect}
       />
 

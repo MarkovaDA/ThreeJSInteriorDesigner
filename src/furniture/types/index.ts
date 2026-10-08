@@ -34,6 +34,13 @@ export type CorniceOptions = {
   color?: number;
 };
 
+export type LustreOptions = {
+  /** GLB filename inside `public/furniture/lustre/`, e.g. `red_cuisine.glb`. */
+  model?: string;
+  /** Target width along the longest horizontal axis, in meters. */
+  targetWidth?: number;
+};
+
 export type SceneFurnitureSelection = {
   id: string;
   label: string;
@@ -42,5 +49,7 @@ export type SceneFurnitureSelection = {
 export type SceneProps = {
   selectedFurnitureId?: string | null;
   furnitureRequestId?: number;
+  /** GLB filename for the ceiling lustre (`public/furniture/lustre/`). */
+  lustreModel?: string;
   onFurnitureSelect?: (selection: SceneFurnitureSelection | null) => void;
 };

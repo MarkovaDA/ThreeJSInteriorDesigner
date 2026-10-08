@@ -7,6 +7,7 @@ import { Room } from './containers/room';
 import { RoomWindow } from './containers/window';
 import { Curtains } from './furniture/curtains';
 import { Cornice } from './furniture/cornice';
+import { Lustre } from './furniture/lustre';
 import { Sofa } from './furniture/sofa';
 import type { SceneProps } from './furniture/types';
 import { Lighting } from './meshs/lighting';
@@ -15,6 +16,7 @@ import { Renderer } from './renderer/renderer';
 export default function Scene({
   selectedFurnitureId = null,
   furnitureRequestId = 0,
+  lustreModel = 'red_cuisine.glb',
   onFurnitureSelect,
 }: SceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -27,8 +29,10 @@ export default function Scene({
   const loadTokenRef = useRef(0);
   const pendingFurnitureIdRef = useRef<string | null>(null);
   const onFurnitureSelectRef = useRef(onFurnitureSelect);
+  const lustreModelRef = useRef(lustreModel);
 
   onFurnitureSelectRef.current = onFurnitureSelect;
+  lustreModelRef.current = lustreModel;
 
   const placeFurnitureRef = useRef<(id: string) => Promise<void>>(async () => {});
 
@@ -97,6 +101,7 @@ export default function Scene({
     loadingSofaRef.current = false;
 
     let curtains: Curtains | null = null;
+    let lustre: Lustre | null = null;
 
     const width = container.clientWidth;
     const height = container.clientHeight;
@@ -230,6 +235,22 @@ export default function Scene({
       cornice.add(curtains);
     });
 
+    void Lustre.load({
+      model: lustreModelRef.current,
+      targetWidth: 0.85,
+    }).then((loaded) => {
+      if (cancelledRef.current) {
+        loaded.dispose();
+        return;
+      }
+
+      lustre = loaded;
+      lustre.userData.furnitureId = 'lamp';
+      lustre.userData.label = 'Lustre';
+      lustre.hangFromCeiling({ ceilingY: room.height, gap: 0.04 });
+      scene.add(lustre);
+    });
+
     let frameId = 0;
 
     const animate = () => {
@@ -274,6 +295,8 @@ export default function Scene({
       dragControlsRef.current = null;
       controls.dispose();
       curtains?.dispose();
+      lustre?.dispose();
+      lustre = null;
       sofaRef.current?.dispose();
       sofaRef.current = null;
       sceneRef.current = null;

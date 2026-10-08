@@ -34,8 +34,11 @@ export class Room extends Mesh {
     });
 
     const ceilingMat = new MeshStandardMaterial({
-      color: 0xfaf8f5,
-      roughness: 1,
+      color: 0xffffff,
+      roughness: 0.72,
+      metalness: 0,
+      emissive: 0xffffff,
+      emissiveIntensity: 0.28,
       side: BackSide,
     });
 
