@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { furnitureItems } from '../furniture/catalog';
 import { FurnitureIcon } from './icons/FurnitureIcons';
 import type { FurniturePanelProps } from './types';
@@ -17,7 +18,18 @@ export function FurniturePanel({
 }: FurniturePanelProps) {
   const selectedItem =
     furnitureItems.find((item) => item.id === selectedId) ?? null;
-  const isExpanded = selectedItem !== null;
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    if (selectedItem) {
+      setDrawerOpen(true);
+    } else {
+      setDrawerOpen(false);
+    }
+  }, [selectedItem]);
+
+  const isExpanded = selectedItem !== null && drawerOpen;
+  const arrowLabel = 'Collapse options';
 
   return (
     <div
@@ -41,8 +53,14 @@ export function FurniturePanel({
                     : 'furniture-panel__item'
                 }
                 aria-pressed={isSelected}
-                aria-expanded={isSelected}
-                onClick={() => onSelect?.(item.id)}
+                aria-expanded={isSelected && drawerOpen}
+                onClick={() => {
+                  if (selectedId === item.id) {
+                    setDrawerOpen(true);
+                  }
+
+                  onSelect?.(item.id);
+                }}
               >
                 <span className="furniture-panel__glow" aria-hidden="true" />
 
@@ -57,6 +75,37 @@ export function FurniturePanel({
           );
         })}
       </ul>
+
+      {isExpanded ? (
+        <div className="furniture-panel__seam">
+          <button
+            type="button"
+            className="furniture-panel__arrow furniture-panel__arrow--open"
+            aria-expanded={true}
+            aria-label={arrowLabel}
+            title={arrowLabel}
+            onClick={() => setDrawerOpen(false)}
+          >
+            <span className="furniture-panel__arrow-shine" aria-hidden="true" />
+            <svg
+              className="furniture-panel__chevron"
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              aria-hidden="true"
+            >
+              <path
+                d="M6 14.5 12 9l6 5.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+      ) : null}
 
       <div
         className={
