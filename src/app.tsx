@@ -12,12 +12,8 @@ function App() {
   const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
   const [furnitureRequestId, setFurnitureRequestId] = useState(0);
   const [panelOpen, setPanelOpen] = useState(true);
-  const [sceneSelection, setSceneSelection] =
-    useState<SceneFurnitureSelection | null>(null);
 
   const handleFurnitureSelect = (selection: SceneFurnitureSelection | null) => {
-    setSceneSelection(selection);
-
     if (selection) {
       setPanelOpen(true);
       setSelectedFurnitureId(selection.id);
@@ -47,7 +43,6 @@ function App() {
           onSelect={(id) => {
             setSelectedFurnitureId(id);
             setSelectedChoiceId(null);
-            setSceneSelection(null);
             setFurnitureRequestId((current) => current + 1);
           }}
           onChoiceSelect={setSelectedChoiceId}
