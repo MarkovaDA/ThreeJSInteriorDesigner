@@ -34,7 +34,13 @@ export type CorniceOptions = {
   color?: number;
 };
 
+export type SceneFurnitureSelection = {
+  id: string;
+  label: string;
+};
+
 export type SceneProps = {
   selectedFurnitureId?: string | null;
   furnitureRequestId?: number;
+  onFurnitureSelect?: (selection: SceneFurnitureSelection | null) => void;
 };

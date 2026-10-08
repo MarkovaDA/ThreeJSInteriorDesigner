@@ -36,6 +36,12 @@ export class FurnitureDragControls {
   #pointerId: number | null = null;
   #rotateStartAngle = 0;
   #rotateStartY = 0;
+  #pendingTarget: Object3D | null = null;
+  #pendingEmptyClick = false;
+  #pointerDownX = 0;
+  #pointerDownY = 0;
+  #dragThresholdPx = 6;
+  #onSelect: ((target: Object3D | null) => void) | undefined;
 
   #label: HTMLDivElement;
   #labelTitle: HTMLSpanElement;
@@ -50,6 +56,7 @@ export class FurnitureDragControls {
       bounds,
       wheelRotateStep = Math.PI / 18,
       labelContainer,
+      onSelect,
     }: FurnitureDragOptions,
   ) {
     this.#camera = camera;
@@ -58,6 +65,7 @@ export class FurnitureDragControls {
     this.#bounds = bounds;
     this.#floorPlane = new Plane(new Vector3(0, 1, 0), -floorY);
     this.#wheelRotateStep = wheelRotateStep;
+    this.#onSelect = onSelect;
 
     this.#label = document.createElement('div');
     this.#label.className = 'furniture-hover-label';
@@ -141,10 +149,6 @@ export class FurnitureDragControls {
   };
 
   #onPointerDown = (event: PointerEvent): void => {
-    if (this.#targets.length === 0) {
-      return;
-    }
-
     const isMove = event.button === 0;
     const isRotate = event.button === 2;
 
@@ -154,7 +158,17 @@ export class FurnitureDragControls {
 
     this.#updatePointer(event);
 
-    const target = this.#pickTarget();
+    const target = this.#targets.length > 0 ? this.#pickTarget() : null;
+
+    if (isMove && !target) {
+      this.#pendingTarget = null;
+      this.#pendingEmptyClick = true;
+      this.#pointerDownX = event.clientX;
+      this.#pointerDownY = event.clientY;
+      this.#pointerId = event.pointerId;
+
+      return;
+    }
 
     if (!target) {
       return;
@@ -166,37 +180,53 @@ export class FurnitureDragControls {
       return;
     }
 
-    const localHit = this.#toParentLocal(target, this.#hitPoint);
-
-    this.#dragTarget = target;
-    this.#dragMode = isMove ? 'move' : 'rotate';
     this.#pointerId = event.pointerId;
+    this.#pointerDownX = event.clientX;
+    this.#pointerDownY = event.clientY;
     this.#hideLabel();
 
     if (isMove) {
-      this.#dragOffset.set(
-        target.position.x - localHit.x,
-        0,
-        target.position.z - localHit.z,
-      );
-    } else {
-      this.#rotateStartAngle = Math.atan2(
-        localHit.x - target.position.x,
-        localHit.z - target.position.z,
-      );
-      this.#rotateStartY = target.rotation.y;
+      this.#pendingTarget = target;
+      this.#pendingEmptyClick = false;
+      this.#orbitControls.enabled = false;
+      this.#domElement.setPointerCapture(event.pointerId);
+      event.preventDefault();
+      event.stopPropagation();
+
+      return;
     }
 
-    this.#domElement.style.cursor = 'grabbing';
-    this.#orbitControls.enabled = false;
-    this.#domElement.setPointerCapture(event.pointerId);
-
-    event.preventDefault();
-    event.stopPropagation();
+    if (this.#beginDrag(target, 'rotate', event.pointerId)) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
   };
 
   #onPointerMove = (event: PointerEvent): void => {
     this.#updatePointer(event);
+
+    if (this.#pendingEmptyClick && event.pointerId === this.#pointerId) {
+      if (this.#movedPastThreshold(event)) {
+        this.#pendingEmptyClick = false;
+        this.#pointerId = null;
+      }
+
+      return;
+    }
+
+    if (
+      this.#pendingTarget &&
+      !this.#dragMode &&
+      event.pointerId === this.#pointerId
+    ) {
+      if (this.#movedPastThreshold(event)) {
+        if (this.#beginDrag(this.#pendingTarget, 'move', event.pointerId)) {
+          this.#pendingTarget = null;
+        }
+      }
+
+      return;
+    }
 
     if (this.#dragTarget && event.pointerId === this.#pointerId && this.#dragMode) {
       this.#raycaster.setFromCamera(this.#pointer, this.#camera);
@@ -234,8 +264,31 @@ export class FurnitureDragControls {
       return;
     }
 
-    this.#endDrag();
-    this.#updateHover();
+    if (this.#dragMode) {
+      this.#endDrag();
+      this.#updateHover();
+
+      return;
+    }
+
+    if (this.#pendingTarget) {
+      const selected = this.#pendingTarget;
+
+      this.#clearPendingInteraction();
+      this.#onSelect?.(selected);
+      this.#updateHover();
+
+      return;
+    }
+
+    if (this.#pendingEmptyClick && !this.#movedPastThreshold(event)) {
+      this.#clearPendingInteraction();
+      this.#onSelect?.(null);
+
+      return;
+    }
+
+    this.#clearPendingInteraction();
   };
 
   #onPointerLeave = (): void => {
@@ -342,16 +395,69 @@ export class FurnitureDragControls {
     this.#label.hidden = true;
   }
 
-  #endDrag(): void {
+  #beginDrag(target: Object3D, mode: DragMode, pointerId: number): boolean {
+    this.#raycaster.setFromCamera(this.#pointer, this.#camera);
+
+    if (!this.#intersectFloor()) {
+      return false;
+    }
+
+    const localHit = this.#toParentLocal(target, this.#hitPoint);
+
+    this.#dragTarget = target;
+    this.#dragMode = mode;
+    this.#pointerId = pointerId;
+    this.#pendingTarget = null;
+    this.#pendingEmptyClick = false;
+    this.#hideLabel();
+
+    if (mode === 'move') {
+      this.#dragOffset.set(
+        target.position.x - localHit.x,
+        0,
+        target.position.z - localHit.z,
+      );
+    } else {
+      this.#rotateStartAngle = Math.atan2(
+        localHit.x - target.position.x,
+        localHit.z - target.position.z,
+      );
+      this.#rotateStartY = target.rotation.y;
+    }
+
+    this.#domElement.style.cursor = 'grabbing';
+    this.#orbitControls.enabled = false;
+
+    if (!this.#domElement.hasPointerCapture(pointerId)) {
+      this.#domElement.setPointerCapture(pointerId);
+    }
+
+    return true;
+  }
+
+  #movedPastThreshold(event: PointerEvent): boolean {
+    const dx = event.clientX - this.#pointerDownX;
+    const dy = event.clientY - this.#pointerDownY;
+
+    return Math.hypot(dx, dy) > this.#dragThresholdPx;
+  }
+
+  #clearPendingInteraction(): void {
     if (this.#pointerId !== null && this.#domElement.hasPointerCapture(this.#pointerId)) {
       this.#domElement.releasePointerCapture(this.#pointerId);
     }
 
-    this.#dragTarget = null;
-    this.#dragMode = null;
+    this.#pendingTarget = null;
+    this.#pendingEmptyClick = false;
     this.#pointerId = null;
     this.#orbitControls.enabled = true;
     this.#domElement.style.cursor = '';
+  }
+
+  #endDrag(): void {
+    this.#clearPendingInteraction();
+    this.#dragTarget = null;
+    this.#dragMode = null;
   }
 
   #pickTarget(): Object3D | null {

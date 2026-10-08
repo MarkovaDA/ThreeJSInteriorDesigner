@@ -1,4 +1,4 @@
-import type { Vector3 } from 'three';
+import type { Object3D, Vector3 } from 'three';
 
 export type ControlsOptions = {
   target?: Vector3;
@@ -7,14 +7,11 @@ export type ControlsOptions = {
   dampingFactor?: number;
 };
 
-export type PanelPosition = {
-  x: number;
-  y: number;
-};
-
 export type FurniturePanelProps = {
   selectedId?: string | null;
+  selectedChoiceId?: string | null;
   onSelect?: (id: string) => void;
+  onChoiceSelect?: (choiceId: string) => void;
 };
 
 export type FurnitureDragBounds = {
@@ -32,4 +29,9 @@ export type FurnitureDragOptions = {
   wheelRotateStep?: number;
   /** Optional host for the hover label overlay (defaults to the canvas parent). */
   labelContainer?: HTMLElement;
+  /**
+   * Fires on a short LMB click: the furniture root, or `null` when clicking empty space.
+   * Dragging past the move threshold does not count as a click.
+   */
+  onSelect?: (target: Object3D | null) => void;
 };

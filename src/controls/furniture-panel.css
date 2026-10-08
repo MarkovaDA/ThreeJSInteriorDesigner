@@ -1,60 +1,94 @@
 .furniture-panel {
-  position: absolute;
-  top: 1.15rem;
-  right: 1.15rem;
-  z-index: 10;
-  width: min(21rem, calc(100vw - 2.3rem));
-  max-height: calc(100svh - 2.3rem);
-  overflow: auto;
-  padding: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 1rem;
-  background: rgba(72, 78, 88, 0.45);
-  box-shadow:
-    0 0.5rem 1.5rem rgba(20, 24, 32, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  color: rgba(245, 247, 250, 0.95);
-  font-family:
-    'Segoe UI',
-    system-ui,
-    sans-serif;
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
-}
-
-.furniture-panel--dragging {
-  cursor: grabbing;
-  box-shadow:
-    0 0.75rem 2rem rgba(20, 24, 32, 0.32),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-}
-
-.furniture-panel__header {
   display: flex;
-  align-items: center;
-  margin: 0 0 0.85rem;
-  padding: 0.15rem 0.25rem 0.35rem;
-}
-
-.furniture-panel__title {
-  margin: 0;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(230, 234, 240, 0.72);
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .furniture-panel__grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.6rem;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0.35rem 0.2rem 0.2rem;
+  list-style: none;
+}
+
+.furniture-panel__drawer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.furniture-panel__drawer--open {
+  grid-template-rows: 1fr;
+}
+
+.furniture-panel__drawer-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.furniture-panel__choices {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.furniture-panel__choices-title {
+  margin: 0 0 0.65rem;
+  padding: 0 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(230, 234, 240, 0.62);
+}
+
+.furniture-panel__choices-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.furniture-panel__choice {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(236, 240, 245, 0.9);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.25s ease,
+    color 0.2s ease;
+}
+
+.furniture-panel__choice:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.furniture-panel__choice:focus-visible {
+  outline: 2px solid rgba(210, 220, 235, 0.7);
+  outline-offset: 2px;
+}
+
+.furniture-panel__choice--selected {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.42);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.98);
+  font-weight: 600;
 }
 
 .furniture-panel__item {
@@ -197,7 +231,9 @@
   .furniture-panel__item,
   .furniture-panel__glow,
   .furniture-panel__icon,
-  .furniture-panel__label {
+  .furniture-panel__label,
+  .furniture-panel__choice,
+  .furniture-panel__drawer {
     transition: none;
   }
 
@@ -208,13 +244,6 @@
 }
 
 @media (max-width: 480px) {
-  .furniture-panel {
-    top: 0.75rem;
-    right: 0.75rem;
-    width: min(16.5rem, calc(100vw - 1.5rem));
-    padding: 0.75rem;
-  }
-
   .furniture-panel__grid {
     grid-template-columns: repeat(2, 1fr);
   }

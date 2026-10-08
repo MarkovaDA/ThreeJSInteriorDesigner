@@ -15,6 +15,7 @@ import { Renderer } from './renderer/renderer';
 export default function Scene({
   selectedFurnitureId = null,
   furnitureRequestId = 0,
+  onFurnitureSelect,
 }: SceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<ThreeScene | null>(null);
@@ -25,6 +26,9 @@ export default function Scene({
   const loadingSofaRef = useRef(false);
   const loadTokenRef = useRef(0);
   const pendingFurnitureIdRef = useRef<string | null>(null);
+  const onFurnitureSelectRef = useRef(onFurnitureSelect);
+
+  onFurnitureSelectRef.current = onFurnitureSelect;
 
   const placeFurnitureRef = useRef<(id: string) => Promise<void>>(async () => {});
 
@@ -61,6 +65,7 @@ export default function Scene({
       }
 
       sofaRef.current = loaded;
+      loaded.userData.furnitureId = 'sofa';
       loaded.userData.label = 'Sofa';
       // World space: room sits on y = 0, centered on XZ.
       loaded.position.set(0, 0, 0);
@@ -85,6 +90,7 @@ export default function Scene({
 
   useEffect(() => {
     const container = containerRef.current;
+    
     if (!container) return;
 
     cancelledRef.current = false;
@@ -131,6 +137,24 @@ export default function Scene({
           maxX: room.width / 2,
           minZ: -room.depth / 2,
           maxZ: room.depth / 2,
+        },
+        onSelect: (target) => {
+          if (!target) {
+            onFurnitureSelectRef.current?.(null);
+
+            return;
+          }
+
+          const id =
+            typeof target.userData.furnitureId === 'string'
+              ? target.userData.furnitureId
+              : target.name || 'furniture';
+          const label =
+            typeof target.userData.label === 'string'
+              ? target.userData.label
+              : target.name || 'Furniture';
+
+          onFurnitureSelectRef.current?.({ id, label });
         },
       },
     );
@@ -245,6 +269,7 @@ export default function Scene({
       loadingSofaRef.current = false;
       cancelAnimationFrame(frameId);
       window.removeEventListener('resize', onResize);
+      
       dragControls.dispose();
       dragControlsRef.current = null;
       controls.dispose();
