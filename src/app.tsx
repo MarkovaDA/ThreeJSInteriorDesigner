@@ -12,6 +12,7 @@ function App() {
   const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
   const [furnitureRequestId, setFurnitureRequestId] = useState(0);
   const [panelOpen, setPanelOpen] = useState(true);
+  const [sofaLoading, setSofaLoading] = useState(false);
   const [sceneSelection, setSceneSelection] =
     useState<SceneFurnitureSelection | null>(null);
 
@@ -30,8 +31,17 @@ function App() {
       <Scene
         selectedFurnitureId={selectedFurnitureId}
         furnitureRequestId={furnitureRequestId}
+        sofaModel={selectedChoiceId}
         onFurnitureSelect={handleFurnitureSelect}
+        onSofaLoadingChange={setSofaLoading}
       />
+
+      {sofaLoading ? (
+        <div className="scene-loader" role="status" aria-live="polite">
+          <span className="scene-loader__spinner" aria-hidden="true" />
+          <span className="scene-loader__text">Loading sofa…</span>
+        </div>
+      ) : null}
 
       <SlideOutPanel
         open={panelOpen}
@@ -43,6 +53,7 @@ function App() {
         <FurniturePanel
           selectedId={selectedFurnitureId}
           selectedChoiceId={selectedChoiceId}
+          isModelLoading={sofaLoading}
           onSelect={(id) => {
             setSelectedFurnitureId(id);
             setSelectedChoiceId(null);

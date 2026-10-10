@@ -46,6 +46,17 @@
   color: rgba(230, 234, 240, 0.62);
 }
 
+.furniture-panel__choices-status {
+  margin: 0 0 0.55rem;
+  padding: 0 0.15rem;
+  font-size: 0.78rem;
+  color: rgba(230, 234, 240, 0.7);
+}
+
+.furniture-panel__choices-status--error {
+  color: rgba(255, 170, 160, 0.92);
+}
+
 .furniture-panel__choices-list {
   display: flex;
   flex-wrap: wrap;

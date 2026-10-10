@@ -10,6 +10,7 @@ export type ControlsOptions = {
 export type FurniturePanelProps = {
   selectedId?: string | null;
   selectedChoiceId?: string | null;
+  isModelLoading?: boolean;
   onSelect?: (id: string) => void;
   onChoiceSelect?: (choiceId: string) => void;
 };
