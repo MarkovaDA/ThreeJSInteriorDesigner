@@ -1,0 +1,67 @@
+[
+  {
+    "id": "3d_sofa_rendering.glb",
+    "label": "3d Sofa Rendering",
+    "file": "3d_sofa_rendering.glb"
+  },
+  {
+    "id": "chesterfield_sofa.glb",
+    "label": "Chesterfield Sofa",
+    "file": "chesterfield_sofa.glb"
+  },
+  {
+    "id": "leather_sofa.glb",
+    "label": "Leather Sofa",
+    "file": "leather_sofa.glb"
+  },
+  {
+    "id": "long_sofa.glb",
+    "label": "Long Sofa",
+    "file": "long_sofa.glb"
+  },
+  {
+    "id": "modern__sofa.glb",
+    "label": "Modern Sofa",
+    "file": "modern__sofa.glb"
+  },
+  {
+    "id": "simple_sofa.glb",
+    "label": "Simple Sofa",
+    "file": "simple_sofa.glb"
+  },
+  {
+    "id": "sofa_2.glb",
+    "label": "Sofa 2",
+    "file": "sofa_2.glb"
+  },
+  {
+    "id": "sofa_3230.glb",
+    "label": "Sofa 3230",
+    "file": "sofa_3230.glb"
+  },
+  {
+    "id": "sofa_grey.glb",
+    "label": "Sofa Grey",
+    "file": "sofa_grey.glb"
+  },
+  {
+    "id": "sofa_set.glb",
+    "label": "Sofa Set",
+    "file": "sofa_set.glb"
+  },
+  {
+    "id": "sofa_web.glb",
+    "label": "Sofa Web",
+    "file": "sofa_web.glb"
+  },
+  {
+    "id": "victorian_lounge_sofa.glb",
+    "label": "Victorian Lounge Sofa",
+    "file": "victorian_lounge_sofa.glb"
+  },
+  {
+    "id": "white_sofa.glb",
+    "label": "White Sofa",
+    "file": "white_sofa.glb"
+  }
+]
