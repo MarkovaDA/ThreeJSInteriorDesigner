@@ -1,8 +1,9 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import { furnitureCatalogPlugin } from './vite-plugin-furniture-catalog.ts';
 
 // https://vite.dev/config/
 export default defineConfig({
   base: '/ThreeJSInteriorDesigner/',
-  plugins: [react()],
+  plugins: [react(), furnitureCatalogPlugin()],
 });

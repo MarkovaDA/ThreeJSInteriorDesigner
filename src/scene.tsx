@@ -8,7 +8,7 @@ import { RoomWindow } from './containers/window';
 import { Curtains } from './furniture/curtains';
 import { Cornice } from './furniture/cornice';
 import { Lustre } from './furniture/lustre';
-import { Sofa } from './furniture/sofa';
+import { DEFAULT_SOFA_MODEL, Sofa } from './furniture/sofa';
 import type { SceneProps } from './furniture/types';
 import { Lighting } from './meshs/lighting';
 import { Renderer } from './renderer/renderer';
@@ -16,8 +16,10 @@ import { Renderer } from './renderer/renderer';
 export default function Scene({
   selectedFurnitureId = null,
   furnitureRequestId = 0,
+  sofaModel = null,
   lustreModel = 'red_cuisine.glb',
   onFurnitureSelect,
+  onSofaLoadingChange,
 }: SceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<ThreeScene | null>(null);
@@ -29,14 +31,22 @@ export default function Scene({
   const loadTokenRef = useRef(0);
   const pendingFurnitureIdRef = useRef<string | null>(null);
   const onFurnitureSelectRef = useRef(onFurnitureSelect);
+  const onSofaLoadingChangeRef = useRef(onSofaLoadingChange);
   const lustreModelRef = useRef(lustreModel);
 
   onFurnitureSelectRef.current = onFurnitureSelect;
+  onSofaLoadingChangeRef.current = onSofaLoadingChange;
   lustreModelRef.current = lustreModel;
 
-  const placeFurnitureRef = useRef<(id: string) => Promise<void>>(async () => {});
+  const placeFurnitureRef = useRef<
+    (id: string, model?: string | null, replace?: boolean) => Promise<void>
+  >(async () => {});
 
-  placeFurnitureRef.current = async (id: string) => {
+  placeFurnitureRef.current = async (
+    id: string,
+    model: string | null = null,
+    replace = false,
+  ) => {
     if (id !== 'sofa') {
       return;
     }
@@ -49,15 +59,27 @@ export default function Scene({
       return;
     }
 
-    if (sofaRef.current || loadingSofaRef.current) {
+    if (sofaRef.current && !replace) {
+      return;
+    }
+
+    if (loadingSofaRef.current && !replace) {
       return;
     }
 
     loadingSofaRef.current = true;
+    onSofaLoadingChangeRef.current?.(true);
     const loadToken = ++loadTokenRef.current;
 
+    const previous = sofaRef.current;
+    const previousPosition = previous?.position.clone() ?? null;
+    const previousRotationY = previous?.rotation.y ?? Math.PI / 2;
+
     try {
-      const loaded = await Sofa.load({ targetWidth: 2.4 });
+      const loaded = await Sofa.load({
+        model: model ?? undefined,
+        targetWidth: 2.4,
+      });
 
       if (
         cancelledRef.current ||
@@ -68,18 +90,32 @@ export default function Scene({
         return;
       }
 
+      if (previous) {
+        dragControlsRef.current?.removeTarget(previous);
+        scene.remove(previous);
+        previous.dispose();
+      }
+
       sofaRef.current = loaded;
       loaded.userData.furnitureId = 'sofa';
       loaded.userData.label = 'Sofa';
-      // World space: room sits on y = 0, centered on XZ.
-      loaded.position.set(0, 0, 0);
-      loaded.placeOnFloor(0);
-      // Back against the wall on the right when entering from the door (-Z).
-      loaded.rotation.y = -Math.PI / 2;
+      loaded.userData.model = model ?? DEFAULT_SOFA_MODEL;
 
-      loaded.updateMatrixWorld(true);
-      const sofaBox = new Box3().setFromObject(loaded);
-      loaded.position.z += -room.depth / 2 - sofaBox.min.z;
+      if (previousPosition) {
+        loaded.position.copy(previousPosition);
+        loaded.rotation.y = previousRotationY;
+        loaded.placeOnFloor(0);
+      } else {
+        // World space: room sits on y = 0, centered on XZ.
+        loaded.position.set(0, 0, 0);
+        loaded.placeOnFloor(0);
+        // Back against the wall on the right when entering from the door (-Z).
+        loaded.rotation.y = Math.PI / 2;
+
+        loaded.updateMatrixWorld(true);
+        const sofaBox = new Box3().setFromObject(loaded);
+        loaded.position.z += -room.depth / 2 - sofaBox.min.z;
+      }
 
       scene.add(loaded);
       dragControlsRef.current?.addTarget(loaded);
@@ -88,6 +124,7 @@ export default function Scene({
     } finally {
       if (loadToken === loadTokenRef.current) {
         loadingSofaRef.current = false;
+        onSofaLoadingChangeRef.current?.(false);
       }
     }
   };
@@ -288,6 +325,7 @@ export default function Scene({
       cancelledRef.current = true;
       loadTokenRef.current += 1;
       loadingSofaRef.current = false;
+      onSofaLoadingChangeRef.current?.(false);
       cancelAnimationFrame(frameId);
       window.removeEventListener('resize', onResize);
       
@@ -316,6 +354,14 @@ export default function Scene({
 
     void placeFurnitureRef.current(selectedFurnitureId);
   }, [selectedFurnitureId, furnitureRequestId]);
+
+  useEffect(() => {
+    if (!sofaModel) {
+      return;
+    }
+
+    void placeFurnitureRef.current('sofa', sofaModel, true);
+  }, [sofaModel]);
 
   return <div ref={containerRef} className="scene" />;
 }

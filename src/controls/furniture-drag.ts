@@ -25,13 +25,12 @@ export class FurnitureDragControls {
   #pointer = new Vector2();
   #hitPoint = new Vector3();
   #dragOffset = new Vector3();
-  #labelWorld = new Vector3();
-  #labelBox = new Box3();
   #boundsBox = new Box3();
 
   #targets: Object3D[] = [];
   #dragTarget: Object3D | null = null;
   #hoveredTarget: Object3D | null = null;
+  #selectedTarget: Object3D | null = null;
   #dragMode: DragMode | null = null;
   #pointerId: number | null = null;
   #rotateStartAngle = 0;
@@ -77,7 +76,11 @@ export class FurnitureDragControls {
     this.#labelHint = document.createElement('span');
     this.#labelHint.className = 'furniture-hover-label__hint';
 
-    for (const line of ['LMB move', 'RMB rotate', 'Wheel turn']) {
+    for (const line of [
+      'Left mouse button — move',
+      'Right mouse button — rotate',
+      'Wheel — turn',
+    ]) {
       const row = document.createElement('span');
       row.textContent = line;
       this.#labelHint.appendChild(row);
@@ -101,6 +104,10 @@ export class FurnitureDragControls {
     if (!this.#targets.includes(target)) {
       this.#targets.push(target);
     }
+
+    if (!this.#selectedTarget) {
+      this.#setSelectedTarget(target);
+    }
   }
 
   removeTarget(target: Object3D): void {
@@ -112,18 +119,16 @@ export class FurnitureDragControls {
 
     if (this.#hoveredTarget === target) {
       this.#hoveredTarget = null;
-      this.#hideLabel();
+    }
+
+    if (this.#selectedTarget === target) {
+      this.#setSelectedTarget(null);
     }
   }
 
-  /** Keep the hover label glued to the object while the camera moves. */
+  /** Keep the instructions card pinned for the selected furniture object. */
   update(): void {
-    if (!this.#hoveredTarget || this.#dragMode) {
-      this.#hideLabel();
-      return;
-    }
-
-    this.#positionLabel(this.#hoveredTarget);
+    this.#refreshLabel();
   }
 
   dispose(): void {
@@ -183,7 +188,6 @@ export class FurnitureDragControls {
     this.#pointerId = event.pointerId;
     this.#pointerDownX = event.clientX;
     this.#pointerDownY = event.clientY;
-    this.#hideLabel();
 
     if (isMove) {
       this.#pendingTarget = target;
@@ -275,6 +279,7 @@ export class FurnitureDragControls {
       const selected = this.#pendingTarget;
 
       this.#clearPendingInteraction();
+      this.#setSelectedTarget(selected);
       this.#onSelect?.(selected);
       this.#updateHover();
 
@@ -283,6 +288,7 @@ export class FurnitureDragControls {
 
     if (this.#pendingEmptyClick && !this.#movedPastThreshold(event)) {
       this.#clearPendingInteraction();
+      this.#setSelectedTarget(null);
       this.#onSelect?.(null);
 
       return;
@@ -297,7 +303,6 @@ export class FurnitureDragControls {
     }
 
     this.#hoveredTarget = null;
-    this.#hideLabel();
   };
 
   #onWheel = (event: WheelEvent): void => {
@@ -348,9 +353,16 @@ export class FurnitureDragControls {
   }
 
   #updateHover(): void {
-    const target = this.#pickTarget();
+    this.#hoveredTarget = this.#pickTarget();
+  }
 
-    this.#hoveredTarget = target;
+  #setSelectedTarget(target: Object3D | null): void {
+    this.#selectedTarget = target;
+    this.#refreshLabel();
+  }
+
+  #refreshLabel(): void {
+    const target = this.#selectedTarget;
 
     if (!target) {
       this.#hideLabel();
@@ -361,34 +373,11 @@ export class FurnitureDragControls {
       typeof target.userData.label === 'string' ? target.userData.label : target.name;
 
     this.#labelTitle.textContent = label;
-    this.#positionLabel(target);
+    this.#showLabel();
   }
 
-  #positionLabel(target: Object3D): void {
-    this.#labelBox.setFromObject(target);
-    this.#labelBox.getCenter(this.#labelWorld);
-    this.#labelWorld.y = this.#labelBox.max.y;
-
-    this.#labelWorld.project(this.#camera);
-
-    const rect = this.#domElement.getBoundingClientRect();
-    const host = this.#label.offsetParent as HTMLElement | null;
-    const hostRect = host?.getBoundingClientRect() ?? rect;
-
-    const x = (this.#labelWorld.x * 0.5 + 0.5) * rect.width + rect.left - hostRect.left;
-    const y = (-this.#labelWorld.y * 0.5 + 0.5) * rect.height + rect.top - hostRect.top;
-
-    const visible =
-      this.#labelWorld.z >= -1 &&
-      this.#labelWorld.z <= 1 &&
-      x >= 0 &&
-      y >= 0 &&
-      x <= hostRect.width &&
-      y <= hostRect.height;
-
-    this.#label.hidden = !visible;
-    this.#label.style.left = `${x}px`;
-    this.#label.style.top = `${y}px`;
+  #showLabel(): void {
+    this.#label.hidden = false;
   }
 
   #hideLabel(): void {
@@ -409,7 +398,7 @@ export class FurnitureDragControls {
     this.#pointerId = pointerId;
     this.#pendingTarget = null;
     this.#pendingEmptyClick = false;
-    this.#hideLabel();
+    this.#setSelectedTarget(target);
 
     if (mode === 'move') {
       this.#dragOffset.set(

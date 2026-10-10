@@ -8,7 +8,18 @@ import {
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { SofaOptions } from './types';
 
-const MODEL_URL = `${import.meta.env.BASE_URL}furniture/sofa/leather_sofa.glb?v=20261006`;
+export const DEFAULT_SOFA_MODEL = 'sofa_grey.glb';
+const SOFA_DIR = `${import.meta.env.BASE_URL}furniture/sofa/`;
+
+function resolveModelUrl(model?: string): string {
+  const file = model?.trim()
+    ? model.endsWith('.glb')
+      ? model
+      : `${model}.glb`
+    : DEFAULT_SOFA_MODEL;
+
+  return `${SOFA_DIR}${file}`;
+}
 
 export class Sofa extends Group {
   private constructor() {
@@ -17,11 +28,12 @@ export class Sofa extends Group {
   }
 
   static async load({
+    model,
     targetWidth = 2.2,
   }: SofaOptions = {}): Promise<Sofa> {
     const sofa = new Sofa();
     const loader = new GLTFLoader();
-    const gltf = await loader.loadAsync(MODEL_URL);
+    const gltf = await loader.loadAsync(resolveModelUrl(model));
     const root = gltf.scene;
 
     root.name = 'sofa.ru';
