@@ -24,7 +24,7 @@ export type FurnitureModelChoice = {
 };
 
 export type SofaOptions = {
-  /** GLB filename inside `public/furniture/sofa/`, e.g. `sofa_grey.glb`. */
+  /** GLB filename inside `public/furniture/sofa/`, e.g. `sofa_orange_modern.glb`. */
   model?: string;
   /** Target width along the longest horizontal axis, in meters. */
   targetWidth?: number;
@@ -50,11 +50,17 @@ export type SceneFurnitureSelection = {
   label: string;
 };
 
+/** Active furniture model load shown in the scene/panel loader UI. */
+export type FurnitureLoadingState = {
+  id: string;
+  label: string;
+};
+
 export type SceneProps = {
   selectedFurnitureId?: string | null;
   furnitureRequestId?: number;
   /** Sofa GLB filename from the furniture panel choice list. */
   sofaModel?: string | null;
   onFurnitureSelect?: (selection: SceneFurnitureSelection | null) => void;
-  onSofaLoadingChange?: (loading: boolean) => void;
+  onFurnitureLoadingChange?: (state: FurnitureLoadingState | null) => void;
 };

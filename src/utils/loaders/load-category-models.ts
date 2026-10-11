@@ -1,4 +1,4 @@
-import type { FurnitureModelChoice } from '../furniture/types';
+import type { FurnitureModelChoice } from '../../furniture/types';
 
 export async function loadCategoryModels(
   variantsDir: string,

@@ -8,7 +8,7 @@ import {
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { SofaOptions } from './types';
 
-export const DEFAULT_SOFA_MODEL = 'sofa_grey.glb';
+export const DEFAULT_SOFA_MODEL = 'sofa_orange_modern.glb';
 const SOFA_DIR = `${import.meta.env.BASE_URL}furniture/sofa/`;
 
 function resolveModelUrl(model?: string): string {
