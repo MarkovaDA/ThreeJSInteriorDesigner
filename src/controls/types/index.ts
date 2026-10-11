@@ -14,6 +14,9 @@ export type FurniturePanelProps = {
   loadingLabel?: string | null;
   onSelect?: (id: string) => void;
   onChoiceSelect?: (choiceId: string) => void;
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
+  onZoomReset?: () => void;
 };
 
 export type FurnitureDragBounds = {

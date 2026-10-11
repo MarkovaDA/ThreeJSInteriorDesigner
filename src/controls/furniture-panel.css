@@ -187,6 +187,58 @@
   list-style: none;
 }
 
+.furniture-panel__zoom {
+  margin-top: 0.85rem;
+  padding: 0 0.1rem 0.25rem;
+}
+
+.furniture-panel__choices + .furniture-panel__zoom {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.furniture-panel__drawer-inner > .furniture-panel__zoom:first-child {
+  padding-top: calc(var(--furniture-arrow-size) + 0.45rem);
+}
+
+.furniture-panel__zoom-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.furniture-panel__zoom-button {
+  min-width: 3.25rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(236, 240, 245, 0.9);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.furniture-panel__zoom-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.furniture-panel__zoom-button:focus-visible {
+  outline: 2px solid rgba(210, 220, 235, 0.7);
+  outline-offset: 2px;
+}
+
+.furniture-panel__zoom-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .furniture-panel__choice {
   padding: 0.45rem 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.14);

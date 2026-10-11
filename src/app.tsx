@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import type { ModelZoom } from './camera';
 import Scene from './scene';
 import { FurniturePanel } from './controls/furniture-panel';
 import { SlideOutPanel } from './controls/slide-out-panel';
@@ -17,6 +18,7 @@ function App() {
   const [panelOpen, setPanelOpen] = useState(true);
   const [furnitureLoading, setFurnitureLoading] =
     useState<FurnitureLoadingState | null>(null);
+  const modelZoomRef = useRef<ModelZoom | null>(null);
 
   const handleFurnitureSelect = (selection: SceneFurnitureSelection | null) => {
     if (selection) {
@@ -35,6 +37,9 @@ function App() {
         lustreModel="red_cuisine.glb"
         onFurnitureSelect={handleFurnitureSelect}
         onFurnitureLoadingChange={setFurnitureLoading}
+        onModelZoomReady={(zoom) => {
+          modelZoomRef.current = zoom;
+        }}
       />
 
       {furnitureLoading ? (
@@ -63,6 +68,9 @@ function App() {
             setFurnitureRequestId((current) => current + 1);
           }}
           onChoiceSelect={setSelectedChoiceId}
+          onZoomIn={() => modelZoomRef.current?.zoomBy(0.82)}
+          onZoomOut={() => modelZoomRef.current?.zoomBy(1.22)}
+          onZoomReset={() => modelZoomRef.current?.reset()}
         />
       </SlideOutPanel>
     </main>

@@ -5,8 +5,10 @@ import {
   Material,
   Mesh,
   MeshStandardMaterial,
+  Texture,
   Vector3,
 } from 'three';
+import { createFloorTexture } from './floor-texture';
 import type { RoomOptions } from './types';
 
 export class Room extends Mesh {
@@ -18,18 +20,31 @@ export class Room extends Mesh {
   floorMat: MeshStandardMaterial;
   ceilingMat: MeshStandardMaterial;
 
-  #disposables: Array<BufferGeometry | Material> = [];
+  #disposables: Array<BufferGeometry | Material | Texture> = [];
 
-  constructor({ width = 8, height = 3.2, depth = 8 }: RoomOptions = {}) {
+  constructor({
+    width = 8,
+    height = 3.2,
+    depth = 8,
+    floorTexture = 'herringbone',
+  }: RoomOptions = {}) {
     const wallMat = new MeshStandardMaterial({
       color: 0xf0ebe4,
       roughness: 0.9,
       side: BackSide,
     });
 
+    const floorMap = createFloorTexture({
+      kind: floorTexture,
+      width,
+      depth,
+    });
+
     const floorMat = new MeshStandardMaterial({
-      color: 0xb8956c,
-      roughness: 0.8,
+      map: floorMap,
+      color: 0xffffff,
+      roughness: 0.78,
+      metalness: 0.02,
       side: BackSide,
     });
 
@@ -73,6 +88,7 @@ export class Room extends Mesh {
       this.wallMat,
       this.floorMat,
       this.ceilingMat,
+      floorMap,
     );
   }
 

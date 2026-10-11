@@ -7,3 +7,6 @@ export type CameraOptions = {
   far?: number;
   position?: Vec3;
 };
+
+export type { HomePose, ModelZoom, ModelZoomFitOptions } from './zoom';
+

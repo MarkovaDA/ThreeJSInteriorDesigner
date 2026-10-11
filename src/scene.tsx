@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Box3, Color, Scene as ThreeScene } from 'three';
-import { Camera } from './camera/camera';
+import { Camera, OrbitModelZoom, type ModelZoom } from './camera';
 import { Controls, FurnitureDragControls } from './controls';
 import { RoomDoor } from './containers/door';
 import { Room } from './containers/room';
@@ -26,24 +26,28 @@ export default function Scene({
   lustreModel = 'red_cuisine.glb',
   onFurnitureSelect,
   onFurnitureLoadingChange,
+  onModelZoomReady,
 }: SceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<ThreeScene | null>(null);
   const roomRef = useRef<Room | null>(null);
   const sofaRef = useRef<Sofa | null>(null);
   const dragControlsRef = useRef<FurnitureDragControls | null>(null);
+  const modelZoomRef = useRef<ModelZoom | null>(null);
   const cancelledRef = useRef(false);
   const loadingSofaRef = useRef(false);
   const loadTokenRef = useRef(0);
   const sofaAppearRef = useRef<LoadFurnitureResult<Sofa> | null>(null);
   const pendingFurnitureIdRef = useRef<string | null>(null);
   const onFurnitureSelectRef = useRef(onFurnitureSelect);
+  const onModelZoomReadyRef = useRef(onModelZoomReady);
   const onFurnitureLoadingChangeRef = useRef(onFurnitureLoadingChange);
   const lustreModelRef = useRef(lustreModel);
   const loadingNotifierRef = useRef<FurnitureLoadingNotifier | null>(null);
 
   onFurnitureSelectRef.current = onFurnitureSelect;
   onFurnitureLoadingChangeRef.current = onFurnitureLoadingChange;
+  onModelZoomReadyRef.current = onModelZoomReady;
   lustreModelRef.current = lustreModel;
 
   if (!loadingNotifierRef.current) {
@@ -210,6 +214,11 @@ export default function Scene({
       target: viewTarget,
     });
 
+    const modelZoom = new OrbitModelZoom(camera, controls);
+    modelZoom.saveHome();
+    modelZoomRef.current = modelZoom;
+    onModelZoomReadyRef.current?.(modelZoom);
+
     const dragControls = new FurnitureDragControls(
       camera,
       renderer.domElement,
@@ -238,6 +247,7 @@ export default function Scene({
               ? target.userData.label
               : target.name || 'Furniture';
 
+          modelZoomRef.current?.fitToObject(target);
           onFurnitureSelectRef.current?.({ id, label });
         },
       },
@@ -284,7 +294,7 @@ export default function Scene({
     const roomDoor = new RoomDoor({
       width: 1.0,
       height: doorHeight,
-      panelColor: 0xc4a484,
+      panelColor: 0x9a7a58,
       frameColor: 0xf5f2ec,
       handleColor: 0xc4a46a,
     });
@@ -392,6 +402,7 @@ export default function Scene({
 
       dragControls.dispose();
       dragControlsRef.current = null;
+      modelZoomRef.current = null;
       controls.dispose();
       curtains?.dispose();
       lustre?.dispose();

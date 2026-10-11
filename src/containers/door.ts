@@ -23,7 +23,7 @@ export class RoomDoor extends Group {
     frameDepth = 0.08,
     panelDepth = 0.04,
     frameColor = 0xf5f2ec,
-    panelColor = 0xc4a484,
+    panelColor = 0x9a7a58,
     handleColor = 0xb8a078,
   }: DoorOptions = {}) {
     super();

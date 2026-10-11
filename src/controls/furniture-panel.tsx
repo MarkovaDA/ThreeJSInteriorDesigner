@@ -12,6 +12,9 @@ export function FurniturePanel({
   loadingLabel = null,
   onSelect,
   onChoiceSelect,
+  onZoomIn,
+  onZoomOut,
+  onZoomReset,
 }: FurniturePanelProps) {
   const isModelLoading = Boolean(loadingLabel);
   const selectedItem =
@@ -225,6 +228,42 @@ export function FurniturePanel({
                   })}
                 </ul>
               ) : null}
+            </section>
+          ) : null}
+
+          {selectedItem ? (
+            <section
+              className="furniture-panel__zoom"
+              aria-label="Camera zoom"
+            >
+              <p className="furniture-panel__choices-title">Zoom</p>
+
+              <div className="furniture-panel__zoom-actions">
+                <button
+                  type="button"
+                  className="furniture-panel__zoom-button"
+                  onClick={onZoomIn}
+                  disabled={!onZoomIn}
+                >
+                  In
+                </button>
+                <button
+                  type="button"
+                  className="furniture-panel__zoom-button"
+                  onClick={onZoomOut}
+                  disabled={!onZoomOut}
+                >
+                  Out
+                </button>
+                <button
+                  type="button"
+                  className="furniture-panel__zoom-button"
+                  onClick={onZoomReset}
+                  disabled={!onZoomReset}
+                >
+                  Reset
+                </button>
+              </div>
             </section>
           ) : null}
         </div>

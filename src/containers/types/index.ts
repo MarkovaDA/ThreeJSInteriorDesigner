@@ -2,7 +2,9 @@ export type RoomOptions = {
   width?: number;
   height?: number;
   depth?: number;
-};
+  /** Photo floor map: `herringbone` (default), `oak`, or `planks`. */
+  floorTexture?: 'herringbone' | 'oak' | 'planks';
+}
 
 export type WindowOptions = {
   width?: number;

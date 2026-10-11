@@ -72,4 +72,8 @@ export type SceneProps = {
   lustreModel?: string;
   onFurnitureSelect?: (selection: SceneFurnitureSelection | null) => void;
   onFurnitureLoadingChange?: (state: FurnitureLoadingState | null) => void;
+  /** Fires once the scene model-zoom API is ready. */
+  onModelZoomReady?: (
+    zoom: import('../../camera/types').ModelZoom,
+  ) => void;
 };
