@@ -140,8 +140,42 @@
   color: rgba(230, 234, 240, 0.7);
 }
 
+.furniture-panel__choices-status--loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  animation: furniture-choices-fade-in 0.25s ease both;
+}
+
+.furniture-panel__choices-spinner {
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  border-top-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  animation: furniture-choices-spin 0.7s linear infinite;
+}
+
 .furniture-panel__choices-status--error {
   color: rgba(255, 170, 160, 0.92);
+}
+
+@keyframes furniture-choices-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.15rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes furniture-choices-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .furniture-panel__choices-list {
@@ -326,6 +360,15 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .furniture-panel__choices-status--loading {
+    animation: none;
+  }
+
+  .furniture-panel__choices-spinner {
+    animation: none;
+    border-top-color: rgba(255, 255, 255, 0.45);
+  }
+
   .furniture-panel__item,
   .furniture-panel__glow,
   .furniture-panel__icon,

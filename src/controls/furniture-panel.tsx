@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { furnitureItems } from '../furniture/catalog';
 import type { FurnitureModelChoice } from '../furniture/types';
-import { loadCategoryModels } from '../utils/load-category-models';
+import { loadCategoryModels } from '../utils/loaders';
 import { FurnitureIcon } from './icons/FurnitureIcons';
 import type { FurniturePanelProps } from './types';
 import './furniture-panel.css';
@@ -9,10 +9,11 @@ import './furniture-panel.css';
 export function FurniturePanel({
   selectedId = null,
   selectedChoiceId = null,
-  isModelLoading = false,
+  loadingLabel = null,
   onSelect,
   onChoiceSelect,
 }: FurniturePanelProps) {
+  const isModelLoading = Boolean(loadingLabel);
   const selectedItem =
     furnitureItems.find((item) => item.id === selectedId) ?? null;
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -173,8 +174,18 @@ export function FurniturePanel({
                 <p className="furniture-panel__choices-status">Loading models…</p>
               ) : null}
 
-              {isModelLoading ? (
-                <p className="furniture-panel__choices-status">Loading sofa…</p>
+              {loadingLabel ? (
+                <p
+                  className="furniture-panel__choices-status furniture-panel__choices-status--loading"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <span
+                    className="furniture-panel__choices-spinner"
+                    aria-hidden="true"
+                  />
+                  Loading {loadingLabel}…
+                </p>
               ) : null}
 
               {choicesError ? (
