@@ -30,6 +30,7 @@ export function applyDefaultSofaPose(sofa: Sofa, room: Room): void {
   sofa.rotation.y = SofaPose.RotationY;
 
   sofa.updateMatrixWorld(true);
+  
   const box = new Box3().setFromObject(sofa);
   sofa.position.z += -room.depth / 2 - box.min.z;
 }
