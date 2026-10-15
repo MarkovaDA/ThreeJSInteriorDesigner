@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { ModelZoom } from './camera';
-import Scene from './scene';
+import Scene, { LustreModel } from './scene';
 import { FurniturePanel } from './controls/furniture-panel';
 import { SlideOutPanel } from './controls/slide-out-panel';
 import type {
@@ -34,7 +34,7 @@ function App() {
         selectedFurnitureId={selectedFurnitureId}
         furnitureRequestId={furnitureRequestId}
         sofaModel={selectedChoiceId}
-        lustreModel="red_cuisine.glb"
+        lustreModel={LustreModel.Default}
         onFurnitureSelect={handleFurnitureSelect}
         onFurnitureLoadingChange={setFurnitureLoading}
         onModelZoomReady={(zoom) => {
