@@ -1,13 +1,25 @@
-import type { FurnitureModelChoice } from '../../furniture/types';
+import type { FurnitureModelChoice } from '@/furniture/types';
 
-export async function loadCategoryModels(
-  variantsDir: string,
+/**
+ * Loads the model catalog from a public directory.
+ *
+ * Resolves `{BASE_URL}/{directory}/index.json` (served by the Vite
+ * furniture-catalog plugin from `public/…`) and keeps only well-formed
+ * entries.
+ *
+ * @param directory - Public folder with `.glb` variants, e.g. `furniture/sofa`.
+ * @returns List of choices `{ id, label, file }` for the panel / scene loader.
+ *   Invalid array items are skipped; an empty array means no usable models.
+ * @throws If the request fails or the JSON root is not an array.
+ */
+export async function loadModelsFromDirectory(
+  directory: string,
 ): Promise<FurnitureModelChoice[]> {
   const base = import.meta.env.BASE_URL.endsWith('/')
     ? import.meta.env.BASE_URL
     : `${import.meta.env.BASE_URL}/`;
 
-  const url = `${base}${variantsDir.replace(/^\/+/, '')}/index.json`;
+  const url = `${base}${directory.replace(/^\/+/, '')}/index.json`;
   const response = await fetch(url);
 
   if (!response.ok) {
@@ -23,6 +35,7 @@ export async function loadCategoryModels(
   return payload.filter(isFurnitureModelChoice);
 }
 
+/** Narrows JSON entries to `{ id, label, file }` model choices. */
 function isFurnitureModelChoice(value: unknown): value is FurnitureModelChoice {
   if (!value || typeof value !== 'object') {
     return false;

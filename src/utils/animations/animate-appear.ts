@@ -1,5 +1,8 @@
 import type { Object3D } from 'three';
-import type { AppearAnimation, AppearAnimationOptions } from '../types';
+import type {
+  AppearAnimation,
+  AppearAnimationOptions,
+} from '@/scene/types';
 
 function easeOutCubic(t: number): number {
   return 1 - (1 - t) ** 3;
@@ -36,7 +39,7 @@ export function animateAppear(
     targetScaleY * startScale,
     targetScaleZ * startScale,
   );
-  
+
   object.position.y = targetY - lift;
 
   let frameId = 0;
@@ -93,4 +96,7 @@ export function animateAppear(
   };
 }
 
-export type { AppearAnimation, AppearAnimationOptions } from '../types';
+export type {
+  AppearAnimation,
+  AppearAnimationOptions,
+} from '@/scene/types';

@@ -6,7 +6,7 @@ import {
 import type { RendererOptions } from './types';
 
 export class Renderer extends WebGLRenderer {
-  #container: HTMLElement | null = null;
+  #container?: HTMLElement;
 
   constructor({
     container,
@@ -51,7 +51,7 @@ export class Renderer extends WebGLRenderer {
     if (this.#container?.contains(this.domElement)) {
       this.#container.removeChild(this.domElement);
     }
-    this.#container = null;
+    this.#container = undefined;
     this.dispose();
   }
 }

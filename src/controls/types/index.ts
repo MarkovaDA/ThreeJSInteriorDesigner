@@ -8,10 +8,10 @@ export type ControlsOptions = {
 };
 
 export type FurniturePanelProps = {
-  selectedId?: string | null;
-  selectedChoiceId?: string | null;
+  selectedId?: string;
+  selectedChoiceId?: string;
   /** Label of the furniture model currently loading, if any. */
-  loadingLabel?: string | null;
+  loadingLabel?: string;
   onSelect?: (id: string) => void;
   onChoiceSelect?: (choiceId: string) => void;
   onZoomIn?: () => void;
@@ -35,8 +35,8 @@ export type FurnitureDragOptions = {
   /** Optional host for the hover label overlay (defaults to the canvas parent). */
   labelContainer?: HTMLElement;
   /**
-   * Fires on a short LMB click: the furniture root, or `null` when clicking empty space.
+   * Fires on a short LMB click: the furniture root, or omitted when clicking empty space.
    * Dragging past the move threshold does not count as a click.
    */
-  onSelect?: (target: Object3D | null) => void;
+  onSelect?: (target?: Object3D) => void;
 };

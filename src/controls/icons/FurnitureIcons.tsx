@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import type { FurnitureIconId } from '../../furniture/types';
+import type { FurnitureIconId } from '@/furniture/types';
 
 type IconProps = {
   className?: string;

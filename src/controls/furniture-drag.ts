@@ -28,19 +28,19 @@ export class FurnitureDragControls {
   #boundsBox = new Box3();
 
   #targets: Object3D[] = [];
-  #dragTarget: Object3D | null = null;
-  #hoveredTarget: Object3D | null = null;
-  #selectedTarget: Object3D | null = null;
-  #dragMode: DragMode | null = null;
-  #pointerId: number | null = null;
+  #dragTarget?: Object3D;
+  #hoveredTarget?: Object3D;
+  #selectedTarget?: Object3D;
+  #dragMode?: DragMode;
+  #pointerId?: number;
   #rotateStartAngle = 0;
   #rotateStartY = 0;
-  #pendingTarget: Object3D | null = null;
+  #pendingTarget?: Object3D;
   #pendingEmptyClick = false;
   #pointerDownX = 0;
   #pointerDownY = 0;
   #dragThresholdPx = 6;
-  #onSelect: ((target: Object3D | null) => void) | undefined;
+  #onSelect?: (target?: Object3D) => void;
 
   #label: HTMLDivElement;
   #labelTitle: HTMLSpanElement;
@@ -118,11 +118,11 @@ export class FurnitureDragControls {
     }
 
     if (this.#hoveredTarget === target) {
-      this.#hoveredTarget = null;
+      this.#hoveredTarget = undefined;
     }
 
     if (this.#selectedTarget === target) {
-      this.#setSelectedTarget(null);
+      this.#setSelectedTarget(undefined);
     }
   }
 
@@ -163,10 +163,10 @@ export class FurnitureDragControls {
 
     this.#updatePointer(event);
 
-    const target = this.#targets.length > 0 ? this.#pickTarget() : null;
+    const target = this.#targets.length > 0 ? this.#pickTarget() : undefined;
 
     if (isMove && !target) {
-      this.#pendingTarget = null;
+      this.#pendingTarget = undefined;
       this.#pendingEmptyClick = true;
       this.#pointerDownX = event.clientX;
       this.#pointerDownY = event.clientY;
@@ -212,7 +212,7 @@ export class FurnitureDragControls {
     if (this.#pendingEmptyClick && event.pointerId === this.#pointerId) {
       if (this.#movedPastThreshold(event)) {
         this.#pendingEmptyClick = false;
-        this.#pointerId = null;
+        this.#pointerId = undefined;
       }
 
       return;
@@ -225,7 +225,7 @@ export class FurnitureDragControls {
     ) {
       if (this.#movedPastThreshold(event)) {
         if (this.#beginDrag(this.#pendingTarget, 'move', event.pointerId)) {
-          this.#pendingTarget = null;
+          this.#pendingTarget = undefined;
         }
       }
 
@@ -288,8 +288,8 @@ export class FurnitureDragControls {
 
     if (this.#pendingEmptyClick && !this.#movedPastThreshold(event)) {
       this.#clearPendingInteraction();
-      this.#setSelectedTarget(null);
-      this.#onSelect?.(null);
+      this.#setSelectedTarget(undefined);
+      this.#onSelect?.(undefined);
 
       return;
     }
@@ -302,7 +302,7 @@ export class FurnitureDragControls {
       return;
     }
 
-    this.#hoveredTarget = null;
+    this.#hoveredTarget = undefined;
   };
 
   #onWheel = (event: WheelEvent): void => {
@@ -356,7 +356,7 @@ export class FurnitureDragControls {
     this.#hoveredTarget = this.#pickTarget();
   }
 
-  #setSelectedTarget(target: Object3D | null): void {
+  #setSelectedTarget(target?: Object3D): void {
     this.#selectedTarget = target;
     this.#refreshLabel();
   }
@@ -396,7 +396,7 @@ export class FurnitureDragControls {
     this.#dragTarget = target;
     this.#dragMode = mode;
     this.#pointerId = pointerId;
-    this.#pendingTarget = null;
+    this.#pendingTarget = undefined;
     this.#pendingEmptyClick = false;
     this.#setSelectedTarget(target);
 
@@ -432,30 +432,30 @@ export class FurnitureDragControls {
   }
 
   #clearPendingInteraction(): void {
-    if (this.#pointerId !== null && this.#domElement.hasPointerCapture(this.#pointerId)) {
+    if (this.#pointerId !== undefined && this.#domElement.hasPointerCapture(this.#pointerId)) {
       this.#domElement.releasePointerCapture(this.#pointerId);
     }
 
-    this.#pendingTarget = null;
+    this.#pendingTarget = undefined;
     this.#pendingEmptyClick = false;
-    this.#pointerId = null;
+    this.#pointerId = undefined;
     this.#orbitControls.enabled = true;
     this.#domElement.style.cursor = '';
   }
 
   #endDrag(): void {
     this.#clearPendingInteraction();
-    this.#dragTarget = null;
-    this.#dragMode = null;
+    this.#dragTarget = undefined;
+    this.#dragMode = undefined;
   }
 
-  #pickTarget(): Object3D | null {
+  #pickTarget(): Object3D | undefined {
     this.#raycaster.setFromCamera(this.#pointer, this.#camera);
 
     const intersections = this.#raycaster.intersectObjects(this.#targets, true);
 
     if (intersections.length === 0) {
-      return null;
+      return undefined;
     }
 
     return this.#findTargetRoot(intersections[0].object);
@@ -482,18 +482,18 @@ export class FurnitureDragControls {
     return local;
   }
 
-  #findTargetRoot(object: Object3D): Object3D | null {
-    let current: Object3D | null = object;
+  #findTargetRoot(object: Object3D): Object3D | undefined {
+    let current: Object3D | undefined = object;
 
     while (current) {
       if (this.#targets.includes(current)) {
         return current;
       }
 
-      current = current.parent;
+      current = current.parent ?? undefined;
     }
 
-    return null;
+    return undefined;
   }
 }
 

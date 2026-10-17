@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
-import { furnitureItems } from '../furniture/catalog';
-import type { FurnitureModelChoice } from '../furniture/types';
-import { loadCategoryModels } from '../utils/loaders';
+import { furnitureItems } from '@/furniture/catalog';
+import type { FurnitureModelChoice } from '@/furniture/types';
+import { loadModelsFromDirectory } from '@/scene/loaders';
 import { FurnitureIcon } from './icons/FurnitureIcons';
 import type { FurniturePanelProps } from './types';
 import './furniture-panel.css';
 
 export function FurniturePanel({
-  selectedId = null,
-  selectedChoiceId = null,
-  loadingLabel = null,
+  selectedId,
+  selectedChoiceId,
+  loadingLabel,
   onSelect,
   onChoiceSelect,
   onZoomIn,
@@ -17,14 +17,15 @@ export function FurniturePanel({
   onZoomReset,
 }: FurniturePanelProps) {
   const isModelLoading = Boolean(loadingLabel);
-  const selectedItem =
-    furnitureItems.find((item) => item.id === selectedId) ?? null;
+  const selectedItem = furnitureItems.find((item) => item.id === selectedId);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const variantsDir = selectedItem?.variantsDir ?? null;
+  const variantsDir = selectedItem?.variantsDir;
 
   const [choices, setChoices] = useState<FurnitureModelChoice[]>([]);
   const [choicesLoading, setChoicesLoading] = useState(false);
-  const [choicesError, setChoicesError] = useState<string | null>(null);
+  const [choicesError, setChoicesError] = useState<string | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     if (selectedItem) {
@@ -38,7 +39,7 @@ export function FurniturePanel({
     if (!variantsDir) {
       setChoices([]);
       setChoicesLoading(false);
-      setChoicesError(null);
+      setChoicesError(undefined);
 
       return;
     }
@@ -47,9 +48,9 @@ export function FurniturePanel({
 
     setChoices([]);
     setChoicesLoading(true);
-    setChoicesError(null);
+    setChoicesError(undefined);
 
-    void loadCategoryModels(variantsDir)
+    void loadModelsFromDirectory(variantsDir)
       .then((models) => {
         if (cancelled) {
           return;
@@ -76,7 +77,7 @@ export function FurniturePanel({
     };
   }, [variantsDir]);
 
-  const isExpanded = selectedItem !== null && drawerOpen;
+  const isExpanded = Boolean(selectedItem) && drawerOpen;
   const arrowLabel = 'Collapse options';
 
   return (

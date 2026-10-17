@@ -14,7 +14,7 @@ import type { HomePose, ModelZoom, ModelZoomFitOptions } from '../types';
 export class OrbitModelZoom implements ModelZoom {
   #camera: PerspectiveCamera;
   #controls: OrbitControls;
-  #home: HomePose | null = null;
+  #home?: HomePose;
 
   #box = new Box3();
   #size = new Vector3();

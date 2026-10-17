@@ -1,49 +1,49 @@
 import { useEffect, useRef } from 'react';
-import { Box3, Color, Scene as ThreeScene } from 'three';
-import { Camera, OrbitModelZoom, type ModelZoom } from './camera';
-import { Controls, FurnitureDragControls } from './controls';
-import { RoomDoor } from './containers/door';
-import { Room } from './containers/room';
-import { RoomWindow } from './containers/window';
-import { Curtains } from './furniture/curtains';
-import { Cornice } from './furniture/cornice';
-import { Lustre } from './furniture/lustre';
-import { DEFAULT_SOFA_MODEL, Sofa } from './furniture/sofa';
-import type { SceneProps } from './furniture/types';
-import { Lighting } from './meshs/lighting';
-import { Renderer } from './renderer/renderer';
+import { Box3, Scene as ThreeScene } from 'three';
+import { Camera, OrbitModelZoom, type ModelZoom } from '@/camera';
+import { Controls, FurnitureDragControls } from '@/controls';
+import { Room } from '@/containers/room';
+import { Curtains } from '@/furniture/curtains';
+import { Lustre } from '@/furniture/lustre';
+import { DEFAULT_SOFA_MODEL, Sofa } from '@/furniture/sofa';
+import type { SceneProps } from '@/furniture/types';
+import { Lighting } from '@/meshs/lighting';
+import { Renderer } from '@/renderer/renderer';
+import { Bootstrap } from '@/scene/bootstrap';
 import {
   createFurnitureLoadingNotifier,
-  loadFurnitureObject,
+  loadFurniture,
   type FurnitureLoadingNotifier,
   type LoadFurnitureResult,
-} from './utils/loaders';
+} from '@/scene/loaders';
 
 export default function Scene({
-  selectedFurnitureId = null,
+  selectedFurnitureId,
   furnitureRequestId = 0,
-  sofaModel = null,
+  sofaModel,
   lustreModel = 'red_cuisine.glb',
   onFurnitureSelect,
   onFurnitureLoadingChange,
   onModelZoomReady,
 }: SceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<ThreeScene | null>(null);
-  const roomRef = useRef<Room | null>(null);
-  const sofaRef = useRef<Sofa | null>(null);
-  const dragControlsRef = useRef<FurnitureDragControls | null>(null);
-  const modelZoomRef = useRef<ModelZoom | null>(null);
+  const sceneRef = useRef<ThreeScene | undefined>(undefined);
+  const roomRef = useRef<Room | undefined>(undefined);
+  const sofaRef = useRef<Sofa | undefined>(undefined);
+  const dragControlsRef = useRef<FurnitureDragControls | undefined>(undefined);
+  const modelZoomRef = useRef<ModelZoom | undefined>(undefined);
   const cancelledRef = useRef(false);
   const loadingSofaRef = useRef(false);
   const loadTokenRef = useRef(0);
-  const sofaAppearRef = useRef<LoadFurnitureResult<Sofa> | null>(null);
-  const pendingFurnitureIdRef = useRef<string | null>(null);
+  const sofaAppearRef = useRef<LoadFurnitureResult<Sofa> | undefined>(undefined);
+  const pendingFurnitureIdRef = useRef<string | undefined>(undefined);
   const onFurnitureSelectRef = useRef(onFurnitureSelect);
   const onModelZoomReadyRef = useRef(onModelZoomReady);
   const onFurnitureLoadingChangeRef = useRef(onFurnitureLoadingChange);
   const lustreModelRef = useRef(lustreModel);
-  const loadingNotifierRef = useRef<FurnitureLoadingNotifier | null>(null);
+  const loadingNotifierRef = useRef<FurnitureLoadingNotifier | undefined>(
+    undefined,
+  );
 
   onFurnitureSelectRef.current = onFurnitureSelect;
   onFurnitureLoadingChangeRef.current = onFurnitureLoadingChange;
@@ -57,12 +57,12 @@ export default function Scene({
   }
 
   const placeFurnitureRef = useRef<
-    (id: string, model?: string | null, replace?: boolean) => Promise<void>
+    (id: string, model?: string, replace?: boolean) => Promise<void>
   >(async () => {});
 
   placeFurnitureRef.current = async (
     id: string,
-    model: string | null = null,
+    model?: string,
     replace = false,
   ) => {
     if (id !== 'sofa') {
@@ -90,14 +90,14 @@ export default function Scene({
     const loadToken = ++loadTokenRef.current;
 
     const previous = sofaRef.current;
-    const previousPosition = previous?.position.clone() ?? null;
+    const previousPosition = previous?.position.clone();
     const previousRotationY = previous?.rotation.y ?? 0;
 
     sofaAppearRef.current?.cancel();
-    sofaAppearRef.current = null;
+    sofaAppearRef.current = undefined;
 
     try {
-      const result = await loadFurnitureObject({
+      const result = await loadFurniture({
         id: 'sofa',
         label: 'Sofa',
         loading,
@@ -164,7 +164,7 @@ export default function Scene({
       }
 
       dragControlsRef.current?.addTarget(result.object);
-      sofaAppearRef.current = null;
+      sofaAppearRef.current = undefined;
     } catch (error) {
       console.error('Failed to load sofa model:', error);
 
@@ -182,18 +182,18 @@ export default function Scene({
     cancelledRef.current = false;
     loadingSofaRef.current = false;
 
-    let curtains: Curtains | null = null;
-    let lustre: Lustre | null = null;
-    let curtainsAppear: LoadFurnitureResult<Curtains> | null = null;
+    let curtains: Curtains | undefined;
+    let lustre: Lustre | undefined;
+    let curtainsAppear: LoadFurnitureResult<Curtains> | undefined;
 
     const width = container.clientWidth;
     const height = container.clientHeight;
 
-    const scene = new ThreeScene();
-    scene.background = new Color(0xd4dde8);
+    const bootstrap = new Bootstrap();
+    const scene = bootstrap.initScene();
     sceneRef.current = scene;
 
-    const room = new Room({ width: 8, height: 3.2, depth: 8 });
+    const { room, roomWindow, cornice, roomDoor } = bootstrap.initRoom();
     roomRef.current = room;
 
     const camera = new Camera({ aspect: width / height });
@@ -233,7 +233,7 @@ export default function Scene({
         },
         onSelect: (target) => {
           if (!target) {
-            onFurnitureSelectRef.current?.(null);
+            onFurnitureSelectRef.current?.(undefined);
 
             return;
           }
@@ -277,44 +277,13 @@ export default function Scene({
       },
     });
 
-    const windowWidth = 2.6;
-    const windowHeight = 2.0;
-    const roomWindow = new RoomWindow({ width: windowWidth, height: windowHeight });
-
-    roomWindow.position.set(room.width / 2 - 0.12, -0.15, 0);
-    roomWindow.rotation.y = -Math.PI / 2;
-
-    const cornice = new Cornice({ width: windowWidth + 0.55 });
-    // Local to the window: just above the frame, toward the room.
-    cornice.position.set(0, windowHeight / 2 - 0.02, 0.1);
-    roomWindow.add(cornice);
-    room.add(roomWindow);
-
-    const doorHeight = 2.2;
-    const roomDoor = new RoomDoor({
-      width: 1.0,
-      height: doorHeight,
-      panelColor: 0x9a7a58,
-      frameColor: 0xf5f2ec,
-      handleColor: 0xc4a46a,
-    });
-
-    roomDoor.position.set(
-      -room.width / 2 + 0.02,
-      -room.height / 2 + doorHeight / 2,
-      0,
-    );
-
-    roomDoor.rotation.y = Math.PI / 2;
-    room.add(roomDoor);
-
     scene.add(lighting);
     scene.add(room);
 
     const loading = loadingNotifierRef.current;
 
     if (loading) {
-      void loadFurnitureObject({
+      void loadFurniture({
         id: 'curtains',
         label: 'Curtains',
         loading,
@@ -379,7 +348,7 @@ export default function Scene({
     const pendingId = pendingFurnitureIdRef.current;
 
     if (pendingId) {
-      pendingFurnitureIdRef.current = null;
+      pendingFurnitureIdRef.current = undefined;
       void placeFurnitureRef.current(pendingId);
     } else {
       void placeFurnitureRef.current('sofa');
@@ -395,22 +364,22 @@ export default function Scene({
       loadingSofaRef.current = false;
       loadingNotifierRef.current?.clear();
       sofaAppearRef.current?.cancel();
-      sofaAppearRef.current = null;
+      sofaAppearRef.current = undefined;
       curtainsAppear?.cancel();
       cancelAnimationFrame(frameId);
       window.removeEventListener('resize', onResize);
 
       dragControls.dispose();
-      dragControlsRef.current = null;
-      modelZoomRef.current = null;
+      dragControlsRef.current = undefined;
+      modelZoomRef.current = undefined;
       controls.dispose();
       curtains?.dispose();
       lustre?.dispose();
-      lustre = null;
+      lustre = undefined;
       sofaRef.current?.dispose();
-      sofaRef.current = null;
-      sceneRef.current = null;
-      roomRef.current = null;
+      sofaRef.current = undefined;
+      sceneRef.current = undefined;
+      roomRef.current = undefined;
       cornice.dispose();
       roomWindow.dispose();
       roomDoor.dispose();

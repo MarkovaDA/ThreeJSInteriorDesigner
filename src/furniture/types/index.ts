@@ -64,16 +64,16 @@ export type FurnitureLoadingState = {
 };
 
 export type SceneProps = {
-  selectedFurnitureId?: string | null;
+  selectedFurnitureId?: string;
   furnitureRequestId?: number;
   /** Sofa GLB filename from the furniture panel choice list. */
-  sofaModel?: string | null;
+  sofaModel?: string;
   /** GLB filename for the ceiling lustre (`public/furniture/lustre/`). */
   lustreModel?: string;
-  onFurnitureSelect?: (selection: SceneFurnitureSelection | null) => void;
-  onFurnitureLoadingChange?: (state: FurnitureLoadingState | null) => void;
+  onFurnitureSelect?: (selection?: SceneFurnitureSelection) => void;
+  onFurnitureLoadingChange?: (state?: FurnitureLoadingState) => void;
   /** Fires once the scene model-zoom API is ready. */
   onModelZoomReady?: (
-    zoom: import('../../camera/types').ModelZoom,
+    zoom: import('@/camera/types').ModelZoom,
   ) => void;
 };

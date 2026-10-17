@@ -1,30 +1,33 @@
 import { useRef, useState } from 'react';
-import type { ModelZoom } from './camera';
-import Scene from './scene';
-import { FurniturePanel } from './controls/furniture-panel';
-import { SlideOutPanel } from './controls/slide-out-panel';
+import type { ModelZoom } from '@/camera';
+import { FurniturePanel } from '@/controls/furniture-panel';
+import { SlideOutPanel } from '@/controls/slide-out-panel';
 import type {
   FurnitureLoadingState,
   SceneFurnitureSelection,
-} from './furniture/types';
+} from '@/furniture/types';
+import Scene from './scene';
 import './app.css';
 
 function App() {
-  const [selectedFurnitureId, setSelectedFurnitureId] = useState<string | null>(
-    null,
+  const [selectedFurnitureId, setSelectedFurnitureId] = useState<
+    string | undefined
+  >(undefined);
+  const [selectedChoiceId, setSelectedChoiceId] = useState<string | undefined>(
+    undefined,
   );
-  const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
   const [furnitureRequestId, setFurnitureRequestId] = useState(0);
   const [panelOpen, setPanelOpen] = useState(true);
-  const [furnitureLoading, setFurnitureLoading] =
-    useState<FurnitureLoadingState | null>(null);
-  const modelZoomRef = useRef<ModelZoom | null>(null);
+  const [furnitureLoading, setFurnitureLoading] = useState<
+    FurnitureLoadingState | undefined
+  >(undefined);
+  const modelZoomRef = useRef<ModelZoom | undefined>(undefined);
 
-  const handleFurnitureSelect = (selection: SceneFurnitureSelection | null) => {
+  const handleFurnitureSelect = (selection?: SceneFurnitureSelection) => {
     if (selection) {
       setPanelOpen(true);
       setSelectedFurnitureId(selection.id);
-      setSelectedChoiceId(null);
+      setSelectedChoiceId(undefined);
     }
   };
 
@@ -61,10 +64,10 @@ function App() {
         <FurniturePanel
           selectedId={selectedFurnitureId}
           selectedChoiceId={selectedChoiceId}
-          loadingLabel={furnitureLoading?.label ?? null}
+          loadingLabel={furnitureLoading?.label}
           onSelect={(id) => {
             setSelectedFurnitureId(id);
-            setSelectedChoiceId(null);
+            setSelectedChoiceId(undefined);
             setFurnitureRequestId((current) => current + 1);
           }}
           onChoiceSelect={setSelectedChoiceId}
