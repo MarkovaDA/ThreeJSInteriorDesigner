@@ -17,7 +17,7 @@ export async function loadFurnitureItem<T extends Object3D>({
   load,
   onLoaded,
   loading,
-  appear = {},
+  appear,
   isCancelled = () => false,
 }: LoadFurnitureOptions<T>): Promise<LoadFurnitureResult<T> | undefined> {
   loading?.start({ id, label });
@@ -35,7 +35,7 @@ export async function loadFurnitureItem<T extends Object3D>({
     await onLoaded?.(object);
     loading?.stop(id);
 
-    if (!appear || Object.keys(appear).length === 0) {
+    if (appear === false) {
       return {
         object,
         cancel: () => {},
@@ -43,13 +43,9 @@ export async function loadFurnitureItem<T extends Object3D>({
       };
     }
 
-    const animation = animateAppear(object, appear);
+    const { cancel, finished } = animateAppear(object, appear ?? {});
 
-    return {
-      object,
-      cancel: animation.cancel,
-      finished: animation.finished,
-    };
+    return { object, cancel, finished };
   } catch (error) {
     loading?.stop(id);
     throw error;

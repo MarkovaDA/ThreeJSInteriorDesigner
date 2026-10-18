@@ -6,9 +6,9 @@ export {
   placeCurtains,
   placeLustre,
   placeSofa,
-  seedDefaultFurniture,
+  resolveFurnitureSelection,
+  placeDefaultFurniture as seedDefaultFurniture,
 } from './utils';
-export type { AnimateSceneOptions } from './utils';
 
 export {
   ItemLoadToSceneService,
@@ -16,8 +16,10 @@ export {
 } from './services';
 
 export type {
+  AnimateSceneOptions,
   AppearAnimation,
   AppearAnimationOptions,
+  AttachParent,
   FurnitureLoadingNotifier,
   InitRoomResult,
   ItemLoadToSceneServiceOptions,

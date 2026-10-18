@@ -1,21 +1,17 @@
-import type { Object3D } from 'three';
 import { Curtains } from '@/furniture/curtains';
 import { Lustre } from '@/furniture/lustre';
 import { DEFAULT_SOFA_MODEL, Sofa } from '@/furniture/sofa';
+import type { AttachParent } from '@/scene/types';
 
 import {
   ItemLoadToSceneService,
   placeFloorItemAgainstBackWall,
 } from '../services';
 
-type HangParent = Object3D & {
-  add(object: Object3D): Object3D;
-};
-
 /** Default room furniture seeded once when the scene mounts. */
-export async function seedDefaultFurniture(options: {
+export async function placeDefaultFurniture(options: {
   lustreModel: string;
-  cornice: HangParent;
+  cornice: AttachParent;
 }): Promise<void> {
   const { lustreModel, cornice } = options;
 
@@ -54,7 +50,7 @@ export function placeSofa(
   });
 }
 
-export function placeCurtains(cornice: HangParent): Promise<void> {
+export function placeCurtains(cornice: AttachParent): Promise<void> {
   const service = ItemLoadToSceneService.getInstance();
 
   if (!service) {
@@ -97,6 +93,6 @@ export function placeLustre(model: string): Promise<void> {
   });
 }
 
-export { animate } from './animate';
-export type { AnimateSceneOptions } from './animate';
+export { animate } from './animations';
+export { resolveFurnitureSelection } from './resolvers';
 

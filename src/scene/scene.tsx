@@ -1,34 +1,20 @@
 import { useEffect, useRef } from 'react';
-import type { Object3D, Scene as ThreeScene, Vector3 } from 'three';
+import type { Scene as ThreeScene, Vector3 } from 'three';
 import { Camera, OrbitModelZoom } from '@/camera';
 import { Controls, FurnitureDragControls } from '@/controls';
 import type { Room } from '@/containers/room';
-import type {
-  SceneFurnitureSelection,
-  SceneProps,
-} from '@/furniture/types';
+import type { SceneProps } from '@/furniture/types';
 import { Lighting } from '@/meshs/lighting';
 import { Renderer } from '@/renderer/renderer';
 import { Bootstrap } from '@/scene/bootstrap';
 import { useLoadFurniture } from '@/scene/hooks';
 import { ItemLoadToSceneService } from '@/scene/services';
 import type { MountedScene, MountSceneOptions } from '@/scene/types';
-import { animate, seedDefaultFurniture } from '@/scene/utils';
-
-function resolveFurnitureSelection(
-  target: Object3D,
-): SceneFurnitureSelection {
-  const id =
-    typeof target.userData.furnitureId === 'string'
-      ? target.userData.furnitureId
-      : target.name || 'furniture';
-  const label =
-    typeof target.userData.label === 'string'
-      ? target.userData.label
-      : target.name || 'Furniture';
-
-  return { id, label };
-}
+import {
+  animate,
+  resolveFurnitureSelection,
+  placeDefaultFurniture,
+} from '@/scene/utils';
 
 /** Boots Three.js runtime for a container and returns a dispose handle. */
 function mountScene({
@@ -196,7 +182,7 @@ function mountScene({
 
   scene.add(room);
 
-  void seedDefaultFurniture({ lustreModel, cornice });
+  void placeDefaultFurniture({ lustreModel, cornice });
 
   const stopAnimation = animate({
     scene,
