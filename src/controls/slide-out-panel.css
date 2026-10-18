@@ -27,15 +27,42 @@
 }
 
 .slide-out-panel--right.slide-out-panel--closed {
-  transform: translateX(100%);
+  transform: translate(
+    calc(100% + var(--drag-x, 0px)),
+    var(--drag-y, 0px)
+  );
 }
 
 .slide-out-panel--left.slide-out-panel--closed {
-  transform: translateX(-100%);
+  transform: translate(
+    calc(-100% + var(--drag-x, 0px)),
+    var(--drag-y, 0px)
+  );
 }
 
 .slide-out-panel--open {
-  transform: translateX(0);
+  transform: translate(var(--drag-x, 0px), var(--drag-y, 0px));
+}
+
+.slide-out-panel--dragging {
+  transition: none;
+  user-select: none;
+  will-change: transform;
+}
+
+.slide-out-panel--dragging .slide-out-panel__surface,
+.slide-out-panel--dragging .slide-out-panel__arrow {
+  /* backdrop-filter resamples the WebGL canvas every frame and causes flicker */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.slide-out-panel--dragging .slide-out-panel__surface {
+  background: rgba(58, 64, 74, 0.94);
+}
+
+.slide-out-panel--dragging .slide-out-panel__arrow {
+  background: rgba(62, 68, 78, 0.94);
 }
 
 .slide-out-panel__arrow,
@@ -188,9 +215,23 @@
 .slide-out-panel__header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
   flex-shrink: 0;
   margin: 0 0 0.85rem;
-  padding: 0.15rem 0.25rem 0.35rem;
+  padding: 0.35rem 0.35rem 0.45rem;
+  border-radius: 0.55rem;
+  cursor: grab;
+  touch-action: none;
+}
+
+.slide-out-panel__header:active {
+  cursor: grabbing;
+}
+
+.slide-out-panel--dragging .slide-out-panel__header {
+  cursor: grabbing;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .slide-out-panel__title {
@@ -200,6 +241,17 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(230, 234, 240, 0.72);
+  pointer-events: none;
+}
+
+.slide-out-panel__drag-hint {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  color: rgba(230, 234, 240, 0.45);
+  pointer-events: none;
+  user-select: none;
 }
 
 .slide-out-panel__body {

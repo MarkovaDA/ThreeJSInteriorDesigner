@@ -6,7 +6,7 @@ import type {
   FurnitureLoadingState,
   SceneFurnitureSelection,
 } from '@/furniture/types';
-import Scene from './scene';
+import Scene from '@/scene';
 import './app.css';
 
 function App() {
