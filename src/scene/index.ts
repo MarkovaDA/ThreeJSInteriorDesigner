@@ -3,6 +3,7 @@ export { Bootstrap } from './bootstrap';
 export { useLoadFurniture } from './hooks';
 export {
   animate,
+  placeAbazure,
   placeCurtains,
   placeLustre,
   placeSofa,

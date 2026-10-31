@@ -7,19 +7,9 @@ import {
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { SofaOptions } from './types';
+import { resolveModelUrl } from './utils';
 
 export const DEFAULT_SOFA_MODEL = 'sofa_orange_modern.glb';
-const SOFA_DIR = `${import.meta.env.BASE_URL}furniture/sofa/`;
-
-function resolveModelUrl(model?: string): string {
-  const file = model?.trim()
-    ? model.endsWith('.glb')
-      ? model
-      : `${model}.glb`
-    : DEFAULT_SOFA_MODEL;
-
-  return `${SOFA_DIR}${file}`;
-}
 
 export class Sofa extends Group {
   private constructor() {
@@ -33,7 +23,9 @@ export class Sofa extends Group {
   }: SofaOptions = {}): Promise<Sofa> {
     const sofa = new Sofa();
     const loader = new GLTFLoader();
-    const gltf = await loader.loadAsync(resolveModelUrl(model));
+    const gltf = await loader.loadAsync(
+      resolveModelUrl('sofa', model, DEFAULT_SOFA_MODEL),
+    );
     const root = gltf.scene;
 
     root.name = 'sofa.ru';

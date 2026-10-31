@@ -7,14 +7,9 @@ import {
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { LustreOptions } from './types';
+import { resolveModelUrl } from './utils';
 
 const DEFAULT_MODEL = 'red_cuisine.glb';
-
-function resolveModelUrl(model: string): string {
-  const fileName = model.endsWith('.glb') ? model : `${model}.glb`;
-
-  return `${import.meta.env.BASE_URL}furniture/lustre/${fileName}`;
-}
 
 export class Lustre extends Group {
   private constructor() {
@@ -28,7 +23,7 @@ export class Lustre extends Group {
   }: LustreOptions = {}): Promise<Lustre> {
     const lustre = new Lustre();
     const loader = new GLTFLoader();
-    const gltf = await loader.loadAsync(resolveModelUrl(model));
+    const gltf = await loader.loadAsync(resolveModelUrl('lustre', model));
     const root = gltf.scene;
 
     root.name = model.replace(/\.glb$/i, '');

@@ -18,6 +18,10 @@ const categories: FurnitureCategory[] = [
     urlPath: 'furniture/sofa',
     fsPath: 'public/furniture/sofa',
   },
+  {
+    urlPath: 'furniture/abazure',
+    fsPath: 'public/furniture/abazure',
+  },
 ];
 
 function formatModelLabel(filename: string): string {

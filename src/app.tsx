@@ -12,7 +12,7 @@ import './app.css';
 function App() {
   const [selectedFurnitureId, setSelectedFurnitureId] = useState<
     string | undefined
-  >(undefined);
+  >('sofa');
   const [selectedChoiceId, setSelectedChoiceId] = useState<string | undefined>(
     undefined,
   );
@@ -36,7 +36,12 @@ function App() {
       <Scene
         selectedFurnitureId={selectedFurnitureId}
         furnitureRequestId={furnitureRequestId}
-        sofaModel={selectedChoiceId}
+        sofaModel={
+          selectedFurnitureId === 'sofa' ? selectedChoiceId : undefined
+        }
+        abazureModel={
+          selectedFurnitureId === 'lamp' ? selectedChoiceId : undefined
+        }
         lustreModel="red_cuisine.glb"
         onFurnitureSelect={handleFurnitureSelect}
         onFurnitureLoadingChange={setFurnitureLoading}

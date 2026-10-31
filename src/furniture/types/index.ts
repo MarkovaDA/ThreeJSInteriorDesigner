@@ -30,6 +30,13 @@ export type SofaOptions = {
   targetWidth?: number;
 };
 
+export type AbazureOptions = {
+  /** GLB filename inside `public/furniture/abazure/`, e.g. `wooden_floor_lamp.glb`. */
+  model?: string;
+  /** Target width along the longest horizontal axis, in meters. */
+  targetWidth?: number;
+};
+
 export type CurtainsOptions = {
   /** Target width across the window, in meters. */
   targetWidth?: number;
@@ -68,6 +75,8 @@ export type SceneProps = {
   furnitureRequestId?: number;
   /** Sofa GLB filename from the furniture panel choice list. */
   sofaModel?: string;
+  /** Abazure / floor-lamp GLB filename from the furniture panel choice list. */
+  abazureModel?: string;
   /** GLB filename for the ceiling lustre (`public/furniture/lustre/`). */
   lustreModel?: string;
   onFurnitureSelect?: (selection?: SceneFurnitureSelection) => void;

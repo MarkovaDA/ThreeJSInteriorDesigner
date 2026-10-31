@@ -1,3 +1,4 @@
+import { Abazure, DEFAULT_ABAZURE_MODEL } from '@/furniture/abazure';
 import { Curtains } from '@/furniture/curtains';
 import { Lustre } from '@/furniture/lustre';
 import { DEFAULT_SOFA_MODEL, Sofa } from '@/furniture/sofa';
@@ -19,6 +20,7 @@ export async function placeDefaultFurniture(options: {
     placeCurtains(cornice),
     placeLustre(lustreModel),
     placeSofa(),
+    placeAbazure(),
   ]);
 }
 
@@ -46,6 +48,39 @@ export function placeSofa(
       }),
     placeOnScene: (loaded, ctx) => {
       placeFloorItemAgainstBackWall(loaded, ctx);
+    },
+  });
+}
+
+export function placeAbazure(
+  model?: string,
+  replace = false,
+): Promise<void> {
+  const service = ItemLoadToSceneService.getInstance();
+
+  if (!service) {
+    return Promise.resolve();
+  }
+
+  const resolvedModel = model ?? DEFAULT_ABAZURE_MODEL;
+
+  return service.placeItemToScene({
+    id: 'lamp',
+    label: 'Lamp',
+    model: resolvedModel,
+    replace,
+    load: () =>
+      Abazure.load({
+        model: model ?? undefined,
+        targetWidth: 0.5,
+      }),
+    placeOnScene: (loaded, ctx) => {
+      placeFloorItemAgainstBackWall(loaded, ctx);
+
+      // Keep the default lamp clear of the centered sofa.
+      if (!ctx.previousPosition) {
+        loaded.position.x = ctx.room.width * 0.28;
+      }
     },
   });
 }
@@ -78,7 +113,7 @@ export function placeLustre(model: string): Promise<void> {
   }
 
   return service.placeItemToScene({
-    id: 'lamp',
+    id: 'lustre',
     label: 'Lustre',
     model,
     draggable: false,

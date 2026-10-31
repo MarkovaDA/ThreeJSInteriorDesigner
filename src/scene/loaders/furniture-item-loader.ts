@@ -27,6 +27,7 @@ export async function loadFurnitureItem<T extends Object3D>({
 
     if (isCancelled()) {
       tryDispose(object);
+
       loading?.stop(id);
 
       return undefined;

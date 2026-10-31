@@ -4,5 +4,6 @@ export type UseLoadFurnitureOptions = {
   selectedFurnitureId?: string;
   furnitureRequestId?: number;
   sofaModel?: string;
+  abazureModel?: string;
   onFurnitureLoadingChange?: (state?: FurnitureLoadingState) => void;
 };

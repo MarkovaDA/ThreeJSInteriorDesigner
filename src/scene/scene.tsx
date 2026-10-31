@@ -213,6 +213,7 @@ export default function Scene({
   selectedFurnitureId,
   furnitureRequestId = 0,
   sofaModel,
+  abazureModel,
   lustreModel = 'red_cuisine.glb',
   onFurnitureSelect,
   onFurnitureLoadingChange,
@@ -230,6 +231,7 @@ export default function Scene({
     selectedFurnitureId,
     furnitureRequestId,
     sofaModel,
+    abazureModel,
     onFurnitureLoadingChange,
   });
 

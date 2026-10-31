@@ -6,13 +6,14 @@ import {
 
 import { ItemLoadToSceneService } from '@/scene/services';
 import type { UseLoadFurnitureOptions } from '@/scene/types';
-import { placeSofa } from '@/scene/utils';
+import { placeAbazure, placeSofa } from '@/scene/utils';
 
 /** Owns furniture loading UI state and reacts to panel place/replace requests. */
 export function useLoadFurniture({
   selectedFurnitureId,
   furnitureRequestId = 0,
   sofaModel,
+  abazureModel,
   onFurnitureLoadingChange,
 }: UseLoadFurnitureOptions): FurnitureLoadingNotifier {
   const onFurnitureLoadingChangeRef = useRef(onFurnitureLoadingChange);
@@ -43,6 +44,22 @@ export function useLoadFurniture({
       void placeSofa();
     }
   }, [selectedFurnitureId, furnitureRequestId, sofaModel]);
+
+  useEffect(() => {
+    if (!ItemLoadToSceneService.getInstance()) {
+      return;
+    }
+
+    if (abazureModel) {
+      void placeAbazure(abazureModel, true);
+
+      return;
+    }
+
+    if (selectedFurnitureId === 'lamp' && furnitureRequestId > 0) {
+      void placeAbazure();
+    }
+  }, [selectedFurnitureId, furnitureRequestId, abazureModel]);
 
   useEffect(() => {
     return () => {

@@ -6,7 +6,7 @@ export const furnitureItems: FurnitureItem[] = [
   { id: 'sofa', name: 'Sofa', icon: 'sofa', variantsDir: 'furniture/sofa' },
   { id: 'bed', name: 'Bed', icon: 'bed' },
   { id: 'wardrobe', name: 'Wardrobe', icon: 'wardrobe' },
-  { id: 'lamp', name: 'Lamp', icon: 'lamp' },
+  { id: 'lamp', name: 'Lamp', icon: 'lamp', variantsDir: 'furniture/abazure' },
   { id: 'curtains', name: 'Curtains', icon: 'curtains' },
   { id: 'cornice', name: 'Cornice', icon: 'cornice' },
 ];
