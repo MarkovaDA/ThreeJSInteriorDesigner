@@ -7,6 +7,7 @@ export {
   placeCurtains,
   placeLustre,
   placeSofa,
+  placeTable,
   resolveFurnitureSelection,
   placeDefaultFurniture as seedDefaultFurniture,
 } from './utils';
@@ -14,6 +15,7 @@ export {
 export {
   ItemLoadToSceneService,
   placeFloorItemAgainstBackWall,
+  placeFloorItemInCenter,
 } from './services';
 
 export type {

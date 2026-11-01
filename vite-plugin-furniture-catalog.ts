@@ -19,6 +19,10 @@ const categories: FurnitureCategory[] = [
     fsPath: 'public/furniture/sofa',
   },
   {
+    urlPath: 'furniture/table',
+    fsPath: 'public/furniture/table',
+  },
+  {
     urlPath: 'furniture/abazure',
     fsPath: 'public/furniture/abazure',
   },

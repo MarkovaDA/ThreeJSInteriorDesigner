@@ -1,3 +1,5 @@
+export type { IFurniture } from '../furniture';
+
 export type FurnitureIconId =
   | 'chair'
   | 'table'
@@ -23,19 +25,18 @@ export type FurnitureModelChoice = {
   file: string;
 };
 
-export type SofaOptions = {
-  /** GLB filename inside `public/furniture/sofa/`, e.g. `sofa_orange_modern.glb`. */
+/** Shared options for GLB furniture that scales to a target width. */
+export type GltfFurnitureOptions = {
+  /** GLB filename inside the category folder under `public/furniture/`. */
   model?: string;
   /** Target width along the longest horizontal axis, in meters. */
   targetWidth?: number;
 };
 
-export type AbazureOptions = {
-  /** GLB filename inside `public/furniture/abazure/`, e.g. `wooden_floor_lamp.glb`. */
-  model?: string;
-  /** Target width along the longest horizontal axis, in meters. */
-  targetWidth?: number;
-};
+export type SofaOptions = GltfFurnitureOptions;
+export type TableOptions = GltfFurnitureOptions;
+export type AbazureOptions = GltfFurnitureOptions;
+export type LustreOptions = GltfFurnitureOptions;
 
 export type CurtainsOptions = {
   /** Target width across the window, in meters. */
@@ -50,13 +51,6 @@ export type CorniceOptions = {
   rodRadius?: number;
   finialRadius?: number;
   color?: number;
-};
-
-export type LustreOptions = {
-  /** GLB filename inside `public/furniture/lustre/`, e.g. `red_cuisine.glb`. */
-  model?: string;
-  /** Target width along the longest horizontal axis, in meters. */
-  targetWidth?: number;
 };
 
 export type SceneFurnitureSelection = {
@@ -75,6 +69,8 @@ export type SceneProps = {
   furnitureRequestId?: number;
   /** Sofa GLB filename from the furniture panel choice list. */
   sofaModel?: string;
+  /** Table GLB filename from the furniture panel choice list. */
+  tableModel?: string;
   /** Abazure / floor-lamp GLB filename from the furniture panel choice list. */
   abazureModel?: string;
   /** GLB filename for the ceiling lustre (`public/furniture/lustre/`). */

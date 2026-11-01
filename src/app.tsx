@@ -39,6 +39,9 @@ function App() {
         sofaModel={
           selectedFurnitureId === 'sofa' ? selectedChoiceId : undefined
         }
+        tableModel={
+          selectedFurnitureId === 'table' ? selectedChoiceId : undefined
+        }
         abazureModel={
           selectedFurnitureId === 'lamp' ? selectedChoiceId : undefined
         }

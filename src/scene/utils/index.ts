@@ -2,11 +2,13 @@ import { Abazure, DEFAULT_ABAZURE_MODEL } from '@/furniture/abazure';
 import { Curtains } from '@/furniture/curtains';
 import { Lustre } from '@/furniture/lustre';
 import { DEFAULT_SOFA_MODEL, Sofa } from '@/furniture/sofa';
+import { DEFAULT_TABLE_MODEL, Table } from '@/furniture/table';
 import type { AttachParent } from '@/scene/types';
 
 import {
   ItemLoadToSceneService,
   placeFloorItemAgainstBackWall,
+  placeFloorItemInCenter,
 } from '../services';
 
 /** Default room furniture seeded once when the scene mounts. */
@@ -20,6 +22,7 @@ export async function placeDefaultFurniture(options: {
     placeCurtains(cornice),
     placeLustre(lustreModel),
     placeSofa(),
+    placeTable(),
     placeAbazure(),
   ]);
 }
@@ -48,6 +51,34 @@ export function placeSofa(
       }),
     placeOnScene: (loaded, ctx) => {
       placeFloorItemAgainstBackWall(loaded, ctx);
+    },
+  });
+}
+
+export function placeTable(
+  model?: string,
+  replace = false,
+): Promise<void> {
+  const service = ItemLoadToSceneService.getInstance();
+
+  if (!service) {
+    return Promise.resolve();
+  }
+
+  const resolvedModel = model ?? DEFAULT_TABLE_MODEL;
+
+  return service.placeItemToScene({
+    id: 'table',
+    label: 'Table',
+    model: resolvedModel,
+    replace,
+    load: () =>
+      Table.load({
+        model: model ?? undefined,
+        targetWidth: 1.1,
+      }),
+    placeOnScene: (loaded, ctx) => {
+      placeFloorItemInCenter(loaded, ctx);
     },
   });
 }

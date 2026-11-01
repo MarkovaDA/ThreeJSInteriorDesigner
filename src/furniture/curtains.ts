@@ -1,24 +1,17 @@
 import {
-  Box3,
   DoubleSide,
-  Group,
-  Material,
   Mesh,
   MeshStandardMaterial,
   Object3D,
-  Vector3,
 } from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { Furniture } from './furniture';
 import type { CurtainsOptions } from './types';
 
 const MODEL_URL = `${import.meta.env.BASE_URL}furniture/curtains/victorian_curtain.glb`;
 
-export class Curtains extends Group {
-  #disposables: Material[] = [];
-
+export class Curtains extends Furniture {
   private constructor() {
-    super();
-    this.name = 'Curtains';
+    super('Curtains');
   }
 
   static async load({
@@ -27,12 +20,6 @@ export class Curtains extends Group {
     fabricRoughness = 0.85,
   }: CurtainsOptions = {}): Promise<Curtains> {
     const curtains = new Curtains();
-    const loader = new GLTFLoader();
-    const gltf = await loader.loadAsync(MODEL_URL);
-    const root = gltf.scene;
-
-    root.name = 'VictorianCurtain';
-    curtains.add(root);
 
     const fabricMat = new MeshStandardMaterial({
       color: fabricColor,
@@ -40,17 +27,28 @@ export class Curtains extends Group {
       metalness: 0.02,
       side: DoubleSide,
     });
-    curtains.#disposables.push(fabricMat);
 
+    await curtains.attachGltfModel({
+      url: MODEL_URL,
+      rootName: 'VictorianCurtain',
+      targetWidth,
+      normalize: 'width',
+      prepareRoot: (root) => {
+        curtains.enableMeshShadows(root);
+        // Draw above window sky/glass so fabric covers the panes.
+        curtains.setMeshesRenderOrder(3, root);
+        curtains.#applyFabricMaterial(root, fabricMat);
+      },
+    });
+
+    return curtains;
+  }
+
+  #applyFabricMaterial(root: Object3D, fabricMat: MeshStandardMaterial): void {
     root.traverse((object: Object3D) => {
       if (!(object instanceof Mesh)) {
         return;
       }
-
-      object.castShadow = true;
-      object.receiveShadow = true;
-      // Draw above window sky/glass so fabric covers the panes.
-      object.renderOrder = 3;
 
       const materials = Array.isArray(object.material)
         ? object.material
@@ -65,22 +63,6 @@ export class Curtains extends Group {
         object.material = fabricMat;
       }
     });
-
-    curtains.#fitToWidth(targetWidth);
-
-    return curtains;
-  }
-
-  #fitToWidth(targetWidth: number): void {
-    const size = new Box3().setFromObject(this).getSize(new Vector3());
-    const horizontal = Math.max(size.x, size.z);
-
-    if (horizontal <= 0.001) {
-      return;
-    }
-
-    const scale = targetWidth / horizontal;
-    this.scale.setScalar(scale);
   }
 
   /** Hang so the top of the fabric sits just under a rod at local y = 0. */
@@ -93,33 +75,7 @@ export class Curtains extends Group {
     z?: number;
     gap?: number;
   } = {}): void {
-    this.position.set(x, 0, z);
-
-    const box = new Box3().setFromObject(this);
-    this.position.y -= box.max.y + gap;
-  }
-
-  dispose(): void {
-    this.traverse((object) => {
-      if (!(object instanceof Mesh)) {
-        return;
-      }
-
-      object.geometry?.dispose();
-
-      const materials = Array.isArray(object.material)
-        ? object.material
-        : [object.material];
-
-      materials.forEach((material) => {
-        if (material && !this.#disposables.includes(material)) {
-          material.dispose();
-        }
-      });
-    });
-
-    this.#disposables.forEach((material) => material.dispose());
-    this.#disposables.length = 0;
+    this.hangUnder({ x, z, y: 0, gap });
   }
 }
 

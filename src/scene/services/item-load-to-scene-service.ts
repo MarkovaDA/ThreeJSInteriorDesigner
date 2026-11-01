@@ -1,5 +1,6 @@
 import { Box3, Object3D, Scene as ThreeScene } from 'three';
 import { Room } from '@/containers/room';
+import { Furniture } from '@/furniture/furniture';
 import {
   loadFurniture,
   type FurnitureLoadingNotifier,
@@ -195,7 +196,7 @@ export class ItemLoadToSceneService {
 
 /** Places a floor item against the -Z wall (default sofa layout). */
 export function placeFloorItemAgainstBackWall(
-  object: Object3D & { placeOnFloor: (floorY: number) => void },
+  object: Furniture,
   {
     room,
     previousPosition,
@@ -218,4 +219,25 @@ export function placeFloorItemAgainstBackWall(
   object.updateMatrixWorld(true);
   const box = new Box3().setFromObject(object);
   object.position.z += -room.depth / 2 - box.min.z;
+}
+
+/** Places a floor item in the center of the room floor. */
+export function placeFloorItemInCenter(
+  object: Furniture,
+  {
+    previousPosition,
+    previousRotationY,
+  }: Pick<ItemPlaceContext, 'previousPosition' | 'previousRotationY'>,
+): void {
+  if (previousPosition) {
+    object.position.copy(previousPosition);
+    object.rotation.y = previousRotationY;
+    object.placeOnFloor(0);
+    return;
+  }
+
+  // World space: room sits on y = 0, centered on XZ.
+  object.position.set(0, 0, 0);
+  object.placeOnFloor(0);
+  object.rotation.y = 0;
 }
